@@ -1,6 +1,17 @@
 {
-  "lastUpdated": "2026-02-18T21:20:00-05:00",
+  "lastUpdated": "2026-02-18T22:15:00-05:00",
   "tasks": [
+    {
+      "id": "task-007",
+      "title": "Mission Control UI/UX Polish",
+      "description": "Proactive UI cleanup — tighter spacing, no text overflows, crisper design, minimal padding, overall polish across all pages.",
+      "assignee": "clawd",
+      "status": "in-progress",
+      "priority": "medium",
+      "category": "dev",
+      "created": "2026-02-18",
+      "updated": "2026-02-18"
+    },
     {
       "id": "task-001",
       "title": "Fix Jobber OAuth Token",
