@@ -64,7 +64,7 @@
       "title": "Mission Control Task Board",
       "description": "Build task board UI, push to GitHub, deploy via GitHub Pages.",
       "assignee": "clawd",
-      "status": "in-progress",
+      "status": "done",
       "priority": "high",
       "category": "dev",
       "created": "2026-02-18",
