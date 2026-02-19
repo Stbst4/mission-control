@@ -4,406 +4,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory — Mission Control</title>
-  <style>
-    :root {
-      --bg: #0A0A0A;
-      --card: rgba(255,255,255,0.03);
-      --card-hover: rgba(255,255,255,0.05);
-      --border: rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.12);
-      --text: rgba(255,255,255,0.9);
-      --text-secondary: rgba(255,255,255,0.5);
-      --text-muted: rgba(255,255,255,0.3);
-      --red: #ef4444;
-      --red-glow: rgba(239,68,68,0.15);
-      --emerald: #34d399;
-      --amber: #fbbf24;
-      --blue: #60a5fa;
-      --violet: #a78bfa;
-      --cyan: #22d3ee;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    body::before, body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    body::before { width: 600px; height: 600px; background: var(--red-glow); top: -200px; right: -200px; }
-    body::after { width: 400px; height: 400px; background: rgba(239,68,68,0.08); bottom: -100px; left: -100px; }
-
-    .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
-
-    /* Nav */
-    .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 12px; }
-    .nav-left { display: flex; align-items: center; gap: 16px; }
-    .logo { font-size: 28px; text-decoration: none; }
-    .nav h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
-    .nav h1 span { color: var(--red); }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link {
-      padding: 8px 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      color: var(--text-secondary);
-      font-size: 13px;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .nav-link:hover { border-color: var(--border-hover); color: var(--text); }
-    .nav-link.active { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); }
-
-    /* Stats */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 32px; }
-    .stat-card {
-      background: linear-gradient(135deg, var(--card), transparent);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      transition: all 0.2s;
-    }
-    .stat-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
-    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-    .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
-
-    /* Search */
-    .search-container { position: relative; margin-bottom: 24px; }
-    .search-input {
-      width: 100%;
-      padding: 14px 20px 14px 48px;
-      background: linear-gradient(135deg, var(--card), transparent);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      color: var(--text);
-      font-size: 15px;
-      font-family: inherit;
-      outline: none;
-      transition: all 0.3s;
-    }
-    .search-input::placeholder { color: var(--text-muted); }
-    .search-input:focus {
-      border-color: rgba(239,68,68,0.3);
-      box-shadow: 0 0 0 3px rgba(239,68,68,0.05), 0 8px 24px rgba(0,0,0,0.2);
-    }
-    .search-icon {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      pointer-events: none;
-      opacity: 0.3;
-    }
-    .search-meta {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .search-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      margin-left: 4px;
-    }
-
-    /* Filters */
-    .filters { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-btn {
-      padding: 6px 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
-    .filter-btn.active { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); }
-    .filter-count { font-size: 10px; opacity: 0.6; margin-left: 4px; }
-
-    /* Memory grid */
-    .memory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-bottom: 32px; }
-
-    .memory-card {
-      background: linear-gradient(135deg, var(--card), transparent);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.25s;
-      position: relative;
-      overflow: hidden;
-    }
-    .memory-card:hover {
-      border-color: rgba(239,68,68,0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(239,68,68,0.05);
-    }
-    .memory-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-    .memory-card:hover::before { opacity: 1; }
-    .memory-card.cat-core::before { background: linear-gradient(90deg, var(--red), var(--violet)); }
-    .memory-card.cat-daily::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-    .memory-card.cat-journal::before { background: linear-gradient(90deg, var(--emerald), var(--cyan)); }
-    .memory-card.cat-business::before { background: linear-gradient(90deg, var(--amber), var(--red)); }
-    .memory-card.cat-reference::before { background: linear-gradient(90deg, var(--violet), var(--blue)); }
-    .memory-card.cat-system::before { background: linear-gradient(90deg, var(--text-muted), var(--text-secondary)); }
-
-    .memory-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .memory-icon { font-size: 20px; }
-    .memory-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .memory-cat {
-      padding: 3px 8px;
-      border-radius: 100px;
-      font-size: 9px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .cat-core .memory-cat { background: rgba(239,68,68,0.1); color: var(--red); }
-    .cat-daily .memory-cat { background: rgba(96,165,250,0.1); color: var(--blue); }
-    .cat-journal .memory-cat { background: rgba(52,211,153,0.1); color: var(--emerald); }
-    .cat-business .memory-cat { background: rgba(251,191,36,0.1); color: var(--amber); }
-    .cat-reference .memory-cat { background: rgba(139,92,246,0.1); color: var(--violet); }
-    .cat-system .memory-cat { background: rgba(255,255,255,0.05); color: var(--text-muted); }
-
-    .memory-preview {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-    .memory-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-    .memory-size { opacity: 0.6; }
-
-    /* Search highlights */
-    mark {
-      background: rgba(239,68,68,0.25);
-      color: var(--text);
-      border-radius: 2px;
-      padding: 0 2px;
-    }
-    .search-match-count {
-      font-size: 10px;
-      color: var(--red);
-      font-weight: 600;
-    }
-
-    /* Document viewer modal */
-    .viewer-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-      overflow-y: auto;
-    }
-    .viewer-overlay.show { display: block; }
-    .viewer {
-      max-width: 800px;
-      margin: 40px auto;
-      background: #111;
-      border: 1px solid var(--border-hover);
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-    }
-    .viewer-header {
-      position: sticky;
-      top: 0;
-      background: rgba(17,17,17,0.95);
-      backdrop-filter: blur(12px);
-      padding: 20px 28px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 2;
-    }
-    .viewer-header::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--red), var(--violet), var(--blue));
-    }
-    .viewer-title-wrap { display: flex; align-items: center; gap: 12px; }
-    .viewer-title { font-size: 18px; font-weight: 700; }
-    .viewer-close {
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-muted);
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .viewer-close:hover { border-color: var(--border-hover); color: var(--text); }
-    .viewer-meta {
-      padding: 16px 28px;
-      display: flex;
-      gap: 20px;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .viewer-meta strong { color: var(--text-secondary); }
-    .viewer-body {
-      padding: 28px;
-      font-size: 14px;
-      line-height: 1.8;
-      color: var(--text-secondary);
-    }
-    .viewer-body h1, .viewer-body h2, .viewer-body h3 {
-      color: var(--text);
-      margin: 24px 0 12px 0;
-      font-weight: 700;
-    }
-    .viewer-body h1 { font-size: 22px; letter-spacing: -0.01em; }
-    .viewer-body h2 {
-      font-size: 17px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .viewer-body h3 { font-size: 15px; color: var(--text-secondary); }
-    .viewer-body p { margin-bottom: 12px; }
-    .viewer-body ul, .viewer-body ol { margin: 8px 0 12px 20px; }
-    .viewer-body li { margin-bottom: 4px; }
-    .viewer-body code {
-      background: rgba(255,255,255,0.06);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-      color: var(--red);
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .viewer-body pre {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      overflow-x: auto;
-      margin: 12px 0;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .viewer-body pre code {
-      background: none;
-      padding: 0;
-      color: var(--text-secondary);
-    }
-    .viewer-body blockquote {
-      border-left: 3px solid var(--red);
-      padding: 8px 16px;
-      margin: 12px 0;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-    .viewer-body strong { color: var(--text); }
-    .viewer-body hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-    .viewer-body a { color: var(--blue); text-decoration: none; }
-    .viewer-body a:hover { text-decoration: underline; }
-    .viewer-body table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 13px;
-    }
-    .viewer-body th, .viewer-body td {
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      text-align: left;
-    }
-    .viewer-body th { background: var(--card); color: var(--text); font-weight: 600; }
-
-    .no-results {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-    .no-results .nr-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
-    .no-results .nr-text { font-size: 14px; }
-
-    .updated-label { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 24px; }
-
-    @media (max-width: 768px) {
-      .memory-grid { grid-template-columns: 1fr; }
-      .nav { flex-direction: column; align-items: flex-start; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .container { padding: 24px 12px; }
-      .viewer { margin: 16px; border-radius: 16px; }
-      .viewer-body { padding: 20px; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <nav class="nav">
       <div class="nav-left">
-        <a href="index.html" class="logo">🦞</a>
-        <h1>Mission <span>Control</span></h1>
+        <a href="index.html" class="nav-logo">🦞</a>
+        <div class="nav-title">Mission Control</div>
       </div>
-      <div class="nav-links">
-        <a href="index.html" class="nav-link">Tasks</a>
-        <a href="calendar.html" class="nav-link">Calendar</a>
-        <a href="memory.html" class="nav-link active">Memory</a>
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">Tasks</a>
+        <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="memory.html" class="nav-tab active">Memory</a>
+      </div>
+      <div class="nav-right">
+        <div class="nav-status"><div class="nav-status-dot"></div>Online</div>
       </div>
     </nav>
 
     <div class="stats" id="stats"></div>
 
-    <div class="search-container">
-      <div class="search-icon">🔍</div>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search all memories..." autocomplete="off" />
+    <div class="search-wrap">
+      <div class="search-icon">⌕</div>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search memories..." autocomplete="off" />
       <div class="search-meta" id="searchMeta"></div>
     </div>
-    <div class="search-hint" id="searchHint">Search by keyword, date, project name, person, or topic</div>
+    <div class="search-shortcut" id="searchHint">Press <kbd style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:10px;border:1px solid var(--border)">/</kbd> to search · keyword, date, person, topic</div>
 
     <div class="filters" id="filters"></div>
     <div class="memory-grid" id="memoryGrid"></div>
     <div class="updated-label" id="updatedLabel"></div>
   </div>
 
-  <!-- Document viewer -->
   <div class="viewer-overlay" id="viewer" onclick="if(event.target===this)closeViewer()">
     <div class="viewer">
       <div class="viewer-header">
@@ -432,112 +65,77 @@
         renderStats(data);
         renderFilters();
         renderGrid();
-        document.getElementById('updatedLabel').textContent =
-          'Last synced: ' + new Date(data.lastUpdated).toLocaleString();
-      } catch(e) {
-        console.error(e);
-      }
+        document.getElementById('updatedLabel').textContent = 'Synced ' + new Date(data.lastUpdated).toLocaleString();
+      } catch(e) { console.error(e); }
     }
 
     function renderStats(data) {
       const cats = {};
-      allMemories.forEach(m => { cats[m.category] = (cats[m.category] || 0) + 1; });
-      const kb = (data.totalSize / 1024).toFixed(0);
+      allMemories.forEach(m => { cats[m.category] = (cats[m.category]||0)+1; });
+      const kb = (data.totalSize/1024).toFixed(0);
       document.getElementById('stats').innerHTML = `
-        <div class="stat-card">
-          <div class="stat-label">Total Files</div>
-          <div class="stat-value">${data.totalFiles}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Size</div>
-          <div class="stat-value">${kb}<span style="font-size:14px;color:var(--text-muted)"> KB</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Daily Notes</div>
-          <div class="stat-value" style="color:var(--blue)">${cats.daily || 0}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Journals</div>
-          <div class="stat-value" style="color:var(--emerald)">${cats.journal || 0}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Reference</div>
-          <div class="stat-value" style="color:var(--violet)">${cats.reference || 0}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Business</div>
-          <div class="stat-value" style="color:var(--amber)">${cats.business || 0}</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Files</div><div class="stat-value">${data.totalFiles}</div></div>
+        <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value">${kb}<span style="font-size:12px;color:var(--text-muted)"> KB</span></div></div>
+        <div class="stat-card"><div class="stat-label">Daily</div><div class="stat-value" style="color:var(--blue)">${cats.daily||0}</div></div>
+        <div class="stat-card"><div class="stat-label">Journal</div><div class="stat-value" style="color:var(--green)">${cats.journal||0}</div></div>
+        <div class="stat-card"><div class="stat-label">Reference</div><div class="stat-value" style="color:var(--violet)">${cats.reference||0}</div></div>
+        <div class="stat-card"><div class="stat-label">Business</div><div class="stat-value" style="color:var(--yellow)">${cats.business||0}</div></div>
       `;
     }
 
     function renderFilters() {
       const cats = { all: allMemories.length };
-      allMemories.forEach(m => { cats[m.category] = (cats[m.category] || 0) + 1; });
-      const labels = { all: 'All', core: '🧠 Core', daily: '📝 Daily', journal: '📓 Journal', business: '💰 Business', reference: '📄 Reference', system: '⚙️ System' };
-      const order = ['all', 'core', 'daily', 'journal', 'business', 'reference', 'system'];
-      document.getElementById('filters').innerHTML = order
-        .filter(k => cats[k])
-        .map(k => `<button class="filter-btn ${k === activeFilter ? 'active' : ''}" onclick="setFilter('${k}')">${labels[k]}<span class="filter-count">${cats[k]}</span></button>`)
-        .join('');
+      allMemories.forEach(m => { cats[m.category]=(cats[m.category]||0)+1; });
+      const labels = {all:'All',core:'Core',daily:'Daily',journal:'Journal',business:'Business',reference:'Reference',system:'System'};
+      const order = ['all','core','daily','journal','business','reference','system'];
+      document.getElementById('filters').innerHTML = order.filter(k=>cats[k]).map(k =>
+        `<button class="filter-btn ${k===activeFilter?'active':''}" onclick="setFilter('${k}')">${labels[k]} <span style="opacity:0.5">${cats[k]}</span></button>`
+      ).join('');
     }
 
-    function setFilter(f) {
-      activeFilter = f;
-      renderFilters();
-      renderGrid();
-    }
+    function setFilter(f) { activeFilter = f; renderFilters(); renderGrid(); }
 
     function searchMemories(query) {
-      if (!query) return allMemories.map(m => ({ ...m, matches: 0, snippets: [] }));
+      if (!query) return allMemories.map(m => ({...m, matches:0, snippets:[]}));
       const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
       return allMemories.map(m => {
-        const text = (m.title + ' ' + m.content + ' ' + (m.filename || '')).toLowerCase();
+        const text = (m.title+' '+m.content+' '+(m.filename||'')).toLowerCase();
         let matches = 0;
         const snippets = [];
         terms.forEach(t => {
           let idx = -1;
-          while ((idx = text.indexOf(t, idx + 1)) !== -1) {
+          while ((idx = text.indexOf(t, idx+1)) !== -1) {
             matches++;
-            if (snippets.length < 3) {
-              const raw = m.content || m.title;
-              const start = Math.max(0, idx - (m.title.length + 1) - 40);
-              const end = Math.min(raw.length, idx - (m.title.length + 1) + t.length + 40);
-              if (start < raw.length && end > 0) {
-                snippets.push(raw.substring(Math.max(0, start), Math.min(raw.length, end)));
-              }
+            if (snippets.length < 2) {
+              const raw = m.content||m.title;
+              const offset = idx - (m.title.length+1);
+              const start = Math.max(0, offset - 50);
+              const end = Math.min(raw.length, offset + t.length + 50);
+              if (start < raw.length && end > 0) snippets.push(raw.substring(Math.max(0,start), Math.min(raw.length,end)));
             }
           }
         });
-        return { ...m, matches, snippets };
-      }).filter(m => m.matches > 0).sort((a, b) => b.matches - a.matches);
+        return {...m, matches, snippets};
+      }).filter(m => m.matches > 0).sort((a,b) => b.matches - a.matches);
     }
 
     function highlightText(text, query) {
       if (!query) return esc(text);
       const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
       let result = esc(text);
-      terms.forEach(t => {
-        const regex = new RegExp(`(${escRegex(t)})`, 'gi');
-        result = result.replace(regex, '<mark>$1</mark>');
-      });
+      terms.forEach(t => { result = result.replace(new RegExp(`(${escRx(t)})`, 'gi'), '<mark>$1</mark>'); });
       return result;
     }
-
-    function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function escRx(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
     function renderGrid() {
-      let memories = searchQuery ? searchMemories(searchQuery) : allMemories.map(m => ({ ...m, matches: 0 }));
+      let memories = searchQuery ? searchMemories(searchQuery) : allMemories.map(m => ({...m, matches:0}));
+      if (activeFilter !== 'all') memories = memories.filter(m => m.category === activeFilter);
 
-      if (activeFilter !== 'all') {
-        memories = memories.filter(m => m.category === activeFilter);
-      }
-
-      // Sort: core first, then by date desc, then alpha
       if (!searchQuery) {
-        memories.sort((a, b) => {
-          if (a.category === 'core' && b.category !== 'core') return -1;
-          if (b.category === 'core' && a.category !== 'core') return 1;
+        memories.sort((a,b) => {
+          if (a.category==='core' && b.category!=='core') return -1;
+          if (b.category==='core' && a.category!=='core') return 1;
           if (a.date && b.date) return b.date.localeCompare(a.date);
           if (a.date) return -1;
           if (b.date) return 1;
@@ -546,80 +144,56 @@
       }
 
       const meta = document.getElementById('searchMeta');
-      if (searchQuery) {
-        meta.textContent = `${memories.length} result${memories.length !== 1 ? 's' : ''}`;
-        document.getElementById('searchHint').style.display = 'none';
-      } else {
-        meta.textContent = '';
-        document.getElementById('searchHint').style.display = '';
-      }
+      if (searchQuery) { meta.textContent = `${memories.length} result${memories.length!==1?'s':''}`; document.getElementById('searchHint').style.display='none'; }
+      else { meta.textContent = ''; document.getElementById('searchHint').style.display=''; }
 
-      if (memories.length === 0) {
-        document.getElementById('memoryGrid').innerHTML = `
-          <div class="no-results" style="grid-column:1/-1">
-            <div class="nr-icon">🔍</div>
-            <div class="nr-text">No memories match "${esc(searchQuery)}"</div>
-          </div>`;
+      if (!memories.length) {
+        document.getElementById('memoryGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1">No results for "${esc(searchQuery)}"</div>`;
         return;
       }
 
       document.getElementById('memoryGrid').innerHTML = memories.map(m => {
         const preview = getPreview(m);
-        const sizeStr = m.size > 1024 ? (m.size / 1024).toFixed(1) + ' KB' : m.size + ' B';
+        const sz = m.size > 1024 ? (m.size/1024).toFixed(1)+' KB' : m.size+' B';
         return `
-          <div class="memory-card cat-${m.category}" onclick='openViewer(${JSON.stringify(m.id)})'>
+          <div class="memory-card" onclick='openViewer(${JSON.stringify(m.id)})'>
             <div class="memory-header">
               <span class="memory-icon">${m.icon}</span>
               <span class="memory-title">${highlightText(m.title, searchQuery)}</span>
-              <span class="memory-cat">${m.category}</span>
+              <span class="memory-cat pill pill-${m.category==='core'?'blocked':m.category==='daily'?'in-progress':m.category==='journal'?'done':m.category==='business'?'shane':m.category==='reference'?'automation':'admin'}">${m.category}</span>
             </div>
             <div class="memory-preview">${highlightText(preview, searchQuery)}</div>
             <div class="memory-footer">
               <span>${m.date || m.filename}</span>
-              ${m.matches ? `<span class="search-match-count">${m.matches} match${m.matches !== 1 ? 'es' : ''}</span>` : ''}
-              <span class="memory-size">${sizeStr} · ${m.lines} lines</span>
+              ${m.matches ? `<span class="match-count">${m.matches} match${m.matches!==1?'es':''}</span>` : ''}
+              <span>${sz} · ${m.lines} lines</span>
             </div>
           </div>`;
       }).join('');
     }
 
     function getPreview(m) {
-      if (m.snippets && m.snippets.length > 0) {
-        return '...' + m.snippets[0].replace(/\n/g, ' ').trim() + '...';
-      }
-      const lines = (m.content || '').split('\n').filter(l => l.trim() && !l.startsWith('#'));
-      return lines.slice(0, 4).join(' ').substring(0, 200);
+      if (m.snippets && m.snippets.length) return '…' + m.snippets[0].replace(/\n/g,' ').trim() + '…';
+      const lines = (m.content||'').split('\n').filter(l => l.trim() && !l.startsWith('#'));
+      return lines.slice(0,4).join(' ').substring(0,200);
     }
 
-    // Markdown renderer (lightweight)
     function renderMarkdown(md) {
       let html = esc(md);
-
-      // Code blocks
       html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-      // Inline code
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-      // Headers
       html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
       html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
       html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-      // Bold
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      // Italic
       html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      // Links
       html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-      // Horizontal rules
       html = html.replace(/^---$/gm, '<hr>');
-      // Blockquotes
       html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-      // Unordered lists
       html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
       html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
-      // Paragraphs (double newline)
       html = html.replace(/\n\n/g, '</p><p>');
       html = '<p>' + html + '</p>';
-      // Clean empty paragraphs
       html = html.replace(/<p>\s*<\/p>/g, '');
       html = html.replace(/<p>\s*(<h[123]>)/g, '$1');
       html = html.replace(/(<\/h[123]>)\s*<\/p>/g, '$1');
@@ -628,36 +202,26 @@
       html = html.replace(/<p>\s*(<pre>)/g, '$1');
       html = html.replace(/(<\/pre>)\s*<\/p>/g, '$1');
       html = html.replace(/<p>\s*(<hr>)/g, '$1');
-      html = html.replace(/(<hr>)\s*<\/p>/g, '$1');
-      html = html.replace(/<p>\s*(<blockquote>)/g, '$1');
-
-      // Highlight search terms
       if (searchQuery) {
-        const terms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
-        terms.forEach(t => {
-          const regex = new RegExp(`(${escRegex(t)})`, 'gi');
-          html = html.replace(regex, '<mark>$1</mark>');
+        searchQuery.toLowerCase().split(/\s+/).filter(Boolean).forEach(t => {
+          html = html.replace(new RegExp(`(${escRx(t)})`, 'gi'), '<mark>$1</mark>');
         });
       }
-
       return html;
     }
 
     function openViewer(id) {
       const m = allMemories.find(x => x.id === id);
       if (!m) return;
-
       document.getElementById('viewerIcon').textContent = m.icon;
       document.getElementById('viewerTitle').textContent = m.title;
-
-      const sizeStr = m.size > 1024 ? (m.size / 1024).toFixed(1) + ' KB' : m.size + ' B';
+      const sz = m.size > 1024 ? (m.size/1024).toFixed(1)+' KB' : m.size+' B';
       document.getElementById('viewerMeta').innerHTML = `
         <span><strong>File:</strong> ${m.filename}</span>
         <span><strong>Category:</strong> ${m.category}</span>
         ${m.date ? `<span><strong>Date:</strong> ${m.date}</span>` : ''}
-        <span><strong>Size:</strong> ${sizeStr} · ${m.lines} lines</span>
+        <span><strong>Size:</strong> ${sz} · ${m.lines} lines</span>
       `;
-
       document.getElementById('viewerBody').innerHTML = renderMarkdown(m.content);
       document.getElementById('viewer').classList.add('show');
       document.body.style.overflow = 'hidden';
@@ -668,19 +232,11 @@
       document.body.style.overflow = '';
     }
 
-    function esc(s) {
-      const d = document.createElement('div');
-      d.textContent = s || '';
-      return d.innerHTML;
-    }
+    function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
 
-    // Search input
     document.getElementById('searchInput').addEventListener('input', e => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        searchQuery = e.target.value.trim();
-        renderGrid();
-      }, 200);
+      debounceTimer = setTimeout(() => { searchQuery = e.target.value.trim(); renderGrid(); }, 150);
     });
 
     document.addEventListener('keydown', e => {

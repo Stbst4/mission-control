@@ -3,337 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mission Control — Brant's Asphalt</title>
-  <style>
-    :root {
-      --bg: #0A0A0A;
-      --card: rgba(255,255,255,0.03);
-      --card-hover: rgba(255,255,255,0.05);
-      --border: rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.12);
-      --text: rgba(255,255,255,0.9);
-      --text-secondary: rgba(255,255,255,0.5);
-      --text-muted: rgba(255,255,255,0.3);
-      --red: #ef4444;
-      --red-glow: rgba(239,68,68,0.15);
-      --emerald: #34d399;
-      --amber: #fbbf24;
-      --blue: #60a5fa;
-      --violet: #a78bfa;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Glow orbs */
-    body::before, body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    body::before {
-      width: 600px; height: 600px;
-      background: var(--red-glow);
-      top: -200px; right: -200px;
-    }
-    body::after {
-      width: 400px; height: 400px;
-      background: rgba(239,68,68,0.08);
-      bottom: -100px; left: -100px;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 48px;
-    }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .logo { font-size: 28px; }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .header h1 span { color: var(--red); }
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    .status-dot {
-      width: 8px; height: 8px;
-      background: var(--emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 12px rgba(52,211,153,0.5);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    /* Stats row */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-    .stat-card {
-      background: linear-gradient(135deg, var(--card), transparent);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      transition: all 0.2s;
-    }
-    .stat-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
-    }
-    .stat-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    /* Filters */
-    .filters {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .filter-btn {
-      padding: 8px 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      color: var(--text-secondary);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .filter-btn:hover {
-      border-color: var(--border-hover);
-      color: var(--text);
-    }
-    .filter-btn.active {
-      background: rgba(239,68,68,0.1);
-      border-color: rgba(239,68,68,0.3);
-      color: var(--red);
-    }
-
-    /* Task list */
-    .task-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .task-card {
-      display: grid;
-      grid-template-columns: 8px 1fr auto auto auto;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 20px;
-      background: linear-gradient(135deg, var(--card), transparent);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      transition: all 0.25s;
-      cursor: default;
-    }
-    .task-card:hover {
-      border-color: rgba(239,68,68,0.2);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(239,68,68,0.05);
-    }
-
-    .priority-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .priority-high { background: var(--red); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
-    .priority-medium { background: var(--amber); box-shadow: 0 0 8px rgba(251,191,36,0.4); }
-    .priority-low { background: var(--blue); box-shadow: 0 0 8px rgba(96,165,250,0.3); }
-
-    .task-info { min-width: 0; }
-    .task-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .task-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .assignee-pill {
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .assignee-shane {
-      background: rgba(251,191,36,0.1);
-      color: var(--amber);
-      border: 1px solid rgba(251,191,36,0.2);
-    }
-    .assignee-clawd {
-      background: rgba(239,68,68,0.1);
-      color: var(--red);
-      border: 1px solid rgba(239,68,68,0.2);
-    }
-
-    .category-pill {
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .cat-sales { background: rgba(239,68,68,0.08); color: #f87171; }
-    .cat-automation { background: rgba(139,92,246,0.08); color: var(--violet); }
-    .cat-operations { background: rgba(52,211,153,0.08); color: var(--emerald); }
-    .cat-dev { background: rgba(96,165,250,0.08); color: var(--blue); }
-    .cat-admin { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
-
-    .status-pill {
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .status-todo { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
-    .status-in-progress { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-    .status-blocked { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
-    .status-done { background: rgba(52,211,153,0.1); color: var(--emerald); border: 1px solid rgba(52,211,153,0.2); }
-
-    .updated-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: right;
-      margin-top: 24px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .task-card {
-        grid-template-columns: 8px 1fr;
-        gap: 8px;
-        padding: 14px 16px;
-      }
-      .task-card > .assignee-pill,
-      .task-card > .category-pill,
-      .task-card > .status-pill {
-        grid-column: 2;
-        justify-self: start;
-      }
-      .header { flex-direction: column; gap: 16px; align-items: flex-start; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .container { padding: 24px 16px; }
-    }
-
-    /* Mobile task pills row */
-    @media (max-width: 768px) {
-      .task-card {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-      .task-pills-mobile {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-    }
-    @media (min-width: 769px) {
-      .task-pills-mobile { display: contents; }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    /* Expand on click */
-    .task-expanded .task-desc {
-      white-space: normal;
-      overflow: visible;
-    }
-    .task-meta {
-      display: none;
-      grid-column: 2 / -1;
-      font-size: 12px;
-      color: var(--text-secondary);
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-      margin-top: 4px;
-    }
-    .task-expanded .task-meta { display: block; }
-  </style>
+  <title>Tasks — Mission Control</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <nav class="nav-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
-      <div class="header-left">
-        <div class="logo">🦞</div>
-        <h1>Mission <span>Control</span></h1>
+    <nav class="nav">
+      <div class="nav-left">
+        <a href="index.html" class="nav-logo">🦞</a>
+        <div class="nav-title">Mission Control</div>
       </div>
-      <div style="display:flex;gap:4px;align-items:center">
-        <a href="index.html" style="padding:8px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:100px;color:#ef4444;font-size:13px;text-decoration:none;font-family:inherit">Tasks</a>
-        <a href="calendar.html" style="padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:100px;color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;font-family:inherit;transition:all 0.2s">Calendar</a>
-        <a href="memory.html" style="padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:100px;color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;font-family:inherit;transition:all 0.2s">Memory</a>
-        <div class="status-badge" style="margin-left:12px">
-          <div class="status-dot"></div>
-          Clawd Online
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab active">Tasks</a>
+        <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="memory.html" class="nav-tab">Memory</a>
+      </div>
+      <div class="nav-right">
+        <div class="nav-status">
+          <div class="nav-status-dot"></div>
+          Online
         </div>
       </div>
     </nav>
@@ -357,84 +45,60 @@
         renderFilters();
         renderTasks();
         document.getElementById('updatedLabel').textContent =
-          'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
-      } catch (e) {
-        document.getElementById('taskList').innerHTML =
-          '<div class="empty-state">Failed to load tasks.</div>';
+          'Updated ' + new Date(data.lastUpdated).toLocaleString();
+      } catch(e) {
+        document.getElementById('taskList').innerHTML = '<div class="empty-state">Failed to load tasks.</div>';
       }
     }
 
     function renderStats() {
       const total = allTasks.length;
-      const inProgress = allTasks.filter(t => t.status === 'in-progress').length;
+      const active = allTasks.filter(t => t.status !== 'done').length;
       const blocked = allTasks.filter(t => t.status === 'blocked').length;
       const done = allTasks.filter(t => t.status === 'done').length;
       const shane = allTasks.filter(t => t.assignee === 'shane' && t.status !== 'done').length;
       const clawd = allTasks.filter(t => t.assignee === 'clawd' && t.status !== 'done').length;
 
       document.getElementById('stats').innerHTML = `
-        <div class="stat-card">
-          <div class="stat-label">Total Tasks</div>
-          <div class="stat-value">${total}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">In Progress</div>
-          <div class="stat-value" style="color:var(--blue)">${inProgress}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Blocked</div>
-          <div class="stat-value" style="color:var(--red)">${blocked}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Done</div>
-          <div class="stat-value" style="color:var(--emerald)">${done}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Shane's Queue</div>
-          <div class="stat-value" style="color:var(--amber)">${shane}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Clawd's Queue</div>
-          <div class="stat-value" style="color:var(--red)">${clawd}</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--blue)">${active}</div></div>
+        <div class="stat-card"><div class="stat-label">Blocked</div><div class="stat-value" style="color:var(--red)">${blocked}</div></div>
+        <div class="stat-card"><div class="stat-label">Done</div><div class="stat-value" style="color:var(--green)">${done}</div></div>
+        <div class="stat-card"><div class="stat-label">Shane</div><div class="stat-value" style="color:var(--yellow)">${shane}</div></div>
+        <div class="stat-card"><div class="stat-label">Clawd</div><div class="stat-value" style="color:var(--blue)">${clawd}</div></div>
       `;
     }
 
     function renderFilters() {
-      const filters = ['all', 'todo', 'in-progress', 'blocked', 'done', 'shane', 'clawd'];
-      const labels = { all: 'All', todo: 'To Do', 'in-progress': 'In Progress', blocked: 'Blocked', done: 'Done', shane: 'Shane', clawd: 'Clawd' };
+      const filters = ['all','todo','in-progress','blocked','done','shane','clawd'];
+      const labels = {all:'All',todo:'To Do','in-progress':'Active',blocked:'Blocked',done:'Done',shane:'Shane',clawd:'Clawd'};
       document.getElementById('filters').innerHTML = filters.map(f =>
-        `<button class="filter-btn ${f === activeFilter ? 'active' : ''}" onclick="setFilter('${f}')">${labels[f]}</button>`
+        `<button class="filter-btn ${f===activeFilter?'active':''}" onclick="setFilter('${f}')">${labels[f]}</button>`
       ).join('');
     }
 
-    function setFilter(f) {
-      activeFilter = f;
-      renderFilters();
-      renderTasks();
-    }
+    function setFilter(f) { activeFilter = f; renderFilters(); renderTasks(); }
 
     function renderTasks() {
       let tasks = [...allTasks];
-
-      if (['todo', 'in-progress', 'blocked', 'done'].includes(activeFilter)) {
+      if (['todo','in-progress','blocked','done'].includes(activeFilter))
         tasks = tasks.filter(t => t.status === activeFilter);
-      } else if (activeFilter === 'shane' || activeFilter === 'clawd') {
+      else if (activeFilter === 'shane' || activeFilter === 'clawd')
         tasks = tasks.filter(t => t.assignee === activeFilter);
-      }
 
-      // Sort: blocked/in-progress first, then by priority
-      const statusOrder = { 'blocked': 0, 'in-progress': 1, 'todo': 2, 'done': 3 };
-      const prioOrder = { 'high': 0, 'medium': 1, 'low': 2 };
-      tasks.sort((a, b) => (statusOrder[a.status] - statusOrder[b.status]) || (prioOrder[a.priority] - prioOrder[b.priority]));
+      const so = {blocked:0,'in-progress':1,todo:2,done:3};
+      const po = {high:0,medium:1,low:2};
+      tasks.sort((a,b) => (so[a.status]-so[b.status]) || (po[a.priority]-po[b.priority]));
 
-      if (tasks.length === 0) {
+      if (!tasks.length) {
         document.getElementById('taskList').innerHTML = '<div class="empty-state">No tasks match this filter.</div>';
         return;
       }
 
+      const sl = s => ({todo:'To Do','in-progress':'In Progress',blocked:'Blocked',done:'Done'}[s]||s);
+
       document.getElementById('taskList').innerHTML = tasks.map(t => `
-        <div class="task-card" onclick="this.classList.toggle('task-expanded')">
+        <div class="task-row" onclick="this.classList.toggle('task-expanded')">
           <div class="priority-dot priority-${t.priority}"></div>
           <div class="task-info">
             <div class="task-title">${esc(t.title)}</div>
@@ -445,27 +109,17 @@
               Created: ${t.created} · Updated: ${t.updated}
             </div>
           </div>
-          <div class="task-pills-mobile">
-            <span class="assignee-pill assignee-${t.assignee}">${t.assignee}</span>
-            <span class="category-pill cat-${t.category}">${t.category}</span>
-            <span class="status-pill status-${t.status}">${statusLabel(t.status)}</span>
+          <div class="task-pills">
+            <span class="pill pill-${t.assignee}">${t.assignee}</span>
+            <span class="pill pill-${t.category}">${t.category}</span>
+            <span class="pill pill-${t.status}">${sl(t.status)}</span>
           </div>
         </div>
       `).join('');
     }
 
-    function statusLabel(s) {
-      return { 'todo': 'To Do', 'in-progress': 'In Progress', 'blocked': 'Blocked', 'done': 'Done' }[s] || s;
-    }
-
-    function esc(s) {
-      const d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
-    }
-
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
     loadTasks();
-    // Auto-refresh every 60s
     setInterval(loadTasks, 60000);
   </script>
 </body>
