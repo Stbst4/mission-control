@@ -6,46 +6,46 @@
   <title>Team — Mission Control</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .org-chart { margin-bottom: 40px; }
+    .org-chart { margin-bottom: 24px; }
 
     /* Leader card */
     .leader-row {
       display: flex;
       justify-content: center;
-      gap: 40px;
-      margin-bottom: 12px;
+      gap: 20px;
+      margin-bottom: 8px;
       position: relative;
     }
     .leader-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px 28px;
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
       text-align: center;
-      min-width: 200px;
+      min-width: 170px;
       position: relative;
       transition: all 0.15s;
     }
     .leader-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
-    .leader-card .agent-avatar { font-size: 32px; margin-bottom: 8px; }
-    .leader-card .agent-name { font-size: 15px; font-weight: 600; color: var(--text-bright); }
-    .leader-card .agent-title { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .leader-card .agent-avatar { font-size: 26px; margin-bottom: 6px; }
+    .leader-card .agent-name { font-size: 13px; font-weight: 600; color: var(--text-bright); }
+    .leader-card .agent-title { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
     /* Connector lines */
     .connector {
       display: flex;
       justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .connector-line {
       width: 1px;
-      height: 24px;
+      height: 16px;
       background: var(--border-hover);
     }
     .connector-branch {
       display: flex;
       justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       position: relative;
     }
     .connector-branch::before {
@@ -55,15 +55,15 @@
       left: 50%;
       transform: translateX(-50%);
       width: 1px;
-      height: 12px;
+      height: 10px;
       background: var(--border-hover);
     }
     .connector-branch::after {
       content: '';
       position: absolute;
-      top: 12px;
-      left: calc(50% - 300px);
-      width: 600px;
+      top: 10px;
+      left: calc(50% - 280px);
+      width: 560px;
       height: 1px;
       background: var(--border-hover);
     }
@@ -71,15 +71,15 @@
     /* Agent grid */
     .agent-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 8px;
-      margin-bottom: 40px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 6px;
+      margin-bottom: 24px;
     }
     .agent-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px;
+      border-radius: var(--radius-lg);
+      padding: 12px;
       transition: all 0.15s;
       cursor: default;
       position: relative;
@@ -90,35 +90,49 @@
     .agent-card-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
     .agent-avatar {
-      font-size: 28px;
-      width: 44px;
-      height: 44px;
+      font-size: 22px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: var(--surface-3);
-      border-radius: 10px;
+      border-radius: var(--radius);
       flex-shrink: 0;
     }
     .agent-info { flex: 1; min-width: 0; }
-    .agent-name { font-size: 14px; font-weight: 600; color: var(--text-bright); }
-    .agent-title { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .agent-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .agent-title {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .agent-status {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 10px;
+      gap: 4px;
+      font-size: 9px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .agent-status-dot {
-      width: 6px; height: 6px;
+      width: 5px; height: 5px;
       border-radius: 50%;
     }
     .status-online .agent-status-dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
@@ -129,25 +143,29 @@
     .status-active { color: var(--blue); }
 
     .agent-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 14px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .agent-responsibilities {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin-bottom: 14px;
+      gap: 2px;
+      margin-bottom: 8px;
     }
     .agent-resp-item {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-secondary);
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-      line-height: 1.4;
+      gap: 5px;
+      line-height: 1.35;
     }
     .agent-resp-bullet {
       width: 3px;
@@ -155,29 +173,29 @@
       border-radius: 50%;
       background: var(--text-dim);
       flex-shrink: 0;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     .agent-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 12px;
+      padding-top: 8px;
       border-top: 1px solid var(--border);
     }
     .agent-schedule {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text-dim);
     }
     .agent-model {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text-dim);
       font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
     .role-pill {
-      padding: 3px 8px;
-      border-radius: 4px;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
       font-size: 9px;
       font-weight: 600;
       text-transform: uppercase;
@@ -194,35 +212,35 @@
     /* Summary stats */
     .team-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
       gap: 1px;
       background: var(--border);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
     }
     .team-stat {
       background: var(--surface);
-      padding: 16px 18px;
+      padding: 10px 12px;
     }
 
-    .section-label { margin-top: 8px; }
+    .section-label { margin-top: 4px; }
 
     /* Motto */
     .motto {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-dim);
       font-style: italic;
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 16px;
       letter-spacing: 0.01em;
     }
 
     @media (max-width: 768px) {
       .agent-grid { grid-template-columns: 1fr; }
-      .leader-row { flex-direction: column; align-items: center; gap: 8px; }
-      .connector-branch::after { width: 1px; left: 50%; height: 24px; }
+      .leader-row { flex-direction: column; align-items: center; gap: 6px; }
+      .connector-branch::after { width: 1px; left: 50%; height: 16px; }
     }
   </style>
 </head>
@@ -302,13 +320,13 @@
           <div class="agent-avatar">${shane.avatar}</div>
           <div class="agent-name">${shane.name}</div>
           <div class="agent-title">${shane.title}</div>
-          <div style="margin-top:8px"><span class="agent-status status-active"><span class="agent-status-dot"></span> Active</span></div>
+          <div style="margin-top:4px"><span class="agent-status status-active"><span class="agent-status-dot"></span> Active</span></div>
         </div>
         <div class="leader-card">
           <div class="agent-avatar">${clawd.avatar}</div>
           <div class="agent-name">${clawd.name}</div>
           <div class="agent-title">${clawd.title}</div>
-          <div style="margin-top:8px"><span class="agent-status status-${clawd.status}"><span class="agent-status-dot"></span> ${clawd.status}</span></div>
+          <div style="margin-top:4px"><span class="agent-status status-${clawd.status}"><span class="agent-status-dot"></span> ${clawd.status}</span></div>
         </div>
       `;
     }
