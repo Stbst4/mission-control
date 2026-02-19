@@ -5,7 +5,7 @@
       "id": "task-007",
       "title": "Mission Control UI/UX Polish",
       "description": "Proactive UI cleanup — tighter spacing, no text overflows, crisper design, minimal padding, overall polish across all pages.",
-      "assignee": "clawd",
+      "assignee": "bolt",
       "status": "in-progress",
       "priority": "medium",
       "category": "dev",

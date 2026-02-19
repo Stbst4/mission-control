@@ -341,13 +341,24 @@
       } catch(e) { console.error(e); }
     }
 
+    // Map agent IDs to task assignee names
+    const agentToAssignee = {
+      'clawd': 'clawd',
+      'agent-dev': 'bolt',
+      'agent-writer': 'ink',
+      'agent-analyst': 'gauge',
+      'agent-scout': 'radar',
+      'agent-ops': 'dispatch',
+      'agent-designer': 'pixel'
+    };
+
     function getAgentStatus(agent) {
-      // Check if agent has active tasks
+      const assigneeName = agentToAssignee[agent.id] || agent.id;
       const activeTasks = taskData.tasks.filter(t =>
-        t.assignee === agent.id.replace('agent-', '') &&
+        t.assignee === assigneeName &&
         (t.status === 'in-progress')
       );
-      if (agent.id === 'clawd') return { status: 'online', label: 'Online', task: 'Monitoring systems' };
+      if (agent.id === 'clawd') return { status: 'online', label: 'Online', task: 'Orchestrating operations' };
       if (activeTasks.length > 0) return { status: 'working', label: 'Working', task: activeTasks[0].title };
       return { status: agent.status === 'online' ? 'online' : 'standby', label: agent.status === 'online' ? 'Online' : 'Standby', task: null };
     }
