@@ -176,7 +176,7 @@ body {
 .task-list { display: flex; flex-direction: column; gap: 1px; }
 .task-row {
   display: grid;
-  grid-template-columns: 6px 1fr auto auto auto;
+  grid-template-columns: 6px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
@@ -186,6 +186,7 @@ body {
   margin-bottom: 2px;
   transition: all 0.15s;
   cursor: default;
+  overflow: hidden;
 }
 .task-row:hover { border-color: var(--border-hover); background: var(--surface-2); }
 
@@ -194,7 +195,7 @@ body {
 .priority-medium { background: var(--yellow); }
 .priority-low { background: var(--blue); }
 
-.task-info { min-width: 0; }
+.task-info { min-width: 0; overflow: hidden; }
 .task-title {
   font-size: 12px;
   font-weight: 500;
@@ -336,6 +337,7 @@ body {
   background: var(--surface);
   min-height: 72px;
   padding: 5px;
+  overflow: hidden;
 }
 .cal-day:hover { background: var(--surface-2); }
 .cal-day.today { background: var(--surface-2); }
@@ -363,6 +365,8 @@ body {
   text-overflow: ellipsis;
   cursor: pointer;
   transition: opacity 0.15s;
+  display: block;
+  max-width: 100%;
 }
 .cal-event:hover { opacity: 0.8; }
 .cal-event.recurring { background: var(--violet-dim); color: var(--violet); }
@@ -388,6 +392,7 @@ body {
   border-radius: var(--radius);
   transition: all 0.15s;
   cursor: pointer;
+  overflow: hidden;
 }
 .schedule-row:hover { border-color: var(--border-hover); background: var(--surface-2); }
 .schedule-time {
@@ -395,9 +400,10 @@ body {
   font-weight: 600;
   color: var(--violet);
   min-width: 72px;
+  flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-.schedule-info { flex: 1; min-width: 0; }
+.schedule-info { flex: 1; min-width: 0; overflow: hidden; }
 .schedule-title {
   font-size: 12px;
   font-weight: 500;
@@ -420,6 +426,8 @@ body {
   font-weight: 600;
   color: var(--yellow);
   min-width: 100px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ─── Memory Grid ─── */
