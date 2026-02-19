@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Asset Browser</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0A0A0A; color: #fff; font-family: -apple-system, 'Inter', sans-serif; padding: 20px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 24px; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .filter-btn { 
+      padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); 
+      background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.5); cursor: pointer; 
+      font-size: 12px; font-weight: 500; transition: all 0.2s; 
+    }
+    .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
+    .filter-btn.active { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.1); }
+    .grid { 
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+      gap: 12px; 
+    }
+    .card { 
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); 
+      border-radius: 10px; overflow: hidden; transition: all 0.2s; cursor: pointer;
+      position: relative;
+    }
+    .card:hover { border-color: rgba(239,68,68,0.3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .card.selected { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.3); }
+    .card.selected::after {
+      content: '✓'; position: absolute; top: 8px; right: 8px; 
+      background: #ef4444; color: white; width: 24px; height: 24px; 
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; z-index: 2;
+    }
+    .card img, .card video { width: 100%; height: 200px; object-fit: cover; display: block; background: #111; }
+    .card-info { padding: 10px 12px; }
+    .card-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 2px; word-break: break-all; }
+    .card-meta { font-size: 10px; color: rgba(255,255,255,0.3); }
+    .card-cat { 
+      display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; 
+      font-weight: 600; text-transform: uppercase; margin-top: 4px; 
+    }
+    .cat-site-photos { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .cat-screenshots { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .cat-satellite { background: rgba(168,85,247,0.15); color: #c084fc; }
+    .cat-equipment { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .cat-logos { background: rgba(236,72,153,0.15); color: #f472b6; }
+    .cat-social { background: rgba(34,211,238,0.15); color: #22d3ee; }
+    .cat-midjourney { background: rgba(253,224,71,0.15); color: #fde047; }
+    .unsupported { 
+      width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; 
+      background: #111; color: rgba(255,255,255,0.3); font-size: 12px; 
+    }
+    .action-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 24px;
+      background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      transform: translateY(100%); transition: transform 0.3s;
+      z-index: 10;
+    }
+    .action-bar.visible { transform: translateY(0); }
+    .action-bar .count { font-size: 14px; font-weight: 600; }
+    .action-bar .count span { color: #ef4444; }
+    .action-bar button {
+      padding: 8px 20px; border-radius: 8px; border: none; 
+      background: #ef4444; color: white; font-weight: 600; font-size: 13px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .action-bar button:hover { background: #dc2626; }
+    .action-bar .copy-btn {
+      background: rgba(255,255,255,0.1); margin-right: 8px;
+    }
+    .action-bar .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* Lightbox */
+    .lightbox { 
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; 
+      display: none; align-items: center; justify-content: center; cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img, .lightbox video { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+    .lightbox .close { position: absolute; top: 16px; right: 20px; color: white; font-size: 28px; cursor: pointer; z-index: 101; }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+      .card img, .card video, .unsupported { height: 140px; }
+      body { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <nav style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06);">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:rgba(255,255,255,0.5);font-size:12px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(239,68,68,0.3)';this.style.color='#ef4444'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.5)'">🦞 Mission Control</a>
+    <span style="color:rgba(255,255,255,0.15);font-size:12px;">›</span>
+    <span style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;">Portfolio Asset Browser</span>
+  </nav>
+
+  <h1>📸 Portfolio Asset Browser</h1>
+  <div class="subtitle">Click images to select. Selected files will be listed for the portfolio site build.</div>
+  
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="action-bar" id="actionBar">
+    <div class="count"><span id="selCount">0</span> selected</div>
+    <div>
+      <button class="copy-btn" onclick="copyList()">📋 Copy File List</button>
+      <button onclick="exportList()">💾 Save Selection</button>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="close">&times;</span>
+    <div id="lightboxContent"></div>
+  </div>
+
+  <script>
+    const BASE = '/portfolio-assets';
+    const selected = new Set();
+    
+    const assets = [
+      // Site Photos
+      { name: 'Corridoni_01.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.5MB' },
+      { name: 'Corridoni_02.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.2MB' },
+      { name: 'Corridoni_03.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.8MB' },
+      { name: 'Corridoni_04.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.7MB' },
+      { name: 'Corridoni_05.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.6MB' },
+      { name: 'Corridoni_06.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.3MB' },
+      { name: 'Corridoni_07.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.5MB' },
+      { name: 'Corridoni_08.jpeg', cat: 'site-photos', folder: 'site-photos', size: '1.3MB' },
+      { name: 'CutiesCoffee_01.jpeg', cat: 'site-photos', folder: 'site-photos', size: '118KB' },
+      { name: 'CutiesCoffee_02.jpeg', cat: 'site-photos', folder: 'site-photos', size: '108KB' },
+      { name: 'CutiesCoffee_03.jpeg', cat: 'site-photos', folder: 'site-photos', size: '128KB' },
+      { name: 'CutiesCoffee_04.jpeg', cat: 'site-photos', folder: 'site-photos', size: '110KB' },
+      { name: 'CutiesCoffee_05.jpeg', cat: 'site-photos', folder: 'site-photos', size: '111KB' },
+      { name: 'Hetherington_01.jpeg', cat: 'site-photos', folder: 'site-photos', size: '420KB' },
+      { name: 'Hetherington_02.jpeg', cat: 'site-photos', folder: 'site-photos', size: '533KB' },
+      { name: 'Hetherington_03.jpeg', cat: 'site-photos', folder: 'site-photos', size: '393KB' },
+      { name: 'Hetherington_04.jpeg', cat: 'site-photos', folder: 'site-photos', size: '491KB' },
+      { name: 'Hetherington_05.jpeg', cat: 'site-photos', folder: 'site-photos', size: '505KB' },
+      { name: 'Hetherington_06.jpeg', cat: 'site-photos', folder: 'site-photos', size: '495KB' },
+      { name: 'Harim_01.jpeg', cat: 'site-photos', folder: 'site-photos', size: '628KB' },
+      { name: 'Seymour_01.jpeg', cat: 'site-photos', folder: 'site-photos', size: '130KB' },
+      { name: 'Seymour_02.jpeg', cat: 'site-photos', folder: 'site-photos', size: '113KB' },
+      { name: 'Seymour_03.jpeg', cat: 'site-photos', folder: 'site-photos', size: '124KB' },
+      { name: 'Schmidt_IMG_5114.jpg', cat: 'site-photos', folder: 'site-photos', size: '3.4MB' },
+      { name: 'IMG_1143.jpg', cat: 'site-photos', folder: 'site-photos', size: '4.2MB' },
+      { name: 'IMG_1143_edited.png', cat: 'site-photos', folder: 'site-photos', size: '29MB' },
+      { name: 'IMG_1203_edited.png', cat: 'site-photos', folder: 'site-photos', size: '34MB' },
+      { name: 'Linepainting.png', cat: 'site-photos', folder: 'site-photos', size: '89KB' },
+      { name: 'jobber_photo_edited.png', cat: 'site-photos', folder: 'site-photos', size: '1.6MB' },
+      { name: 'ChiragRao_IMG_3396.heic', cat: 'site-photos', folder: 'site-photos', size: '2.4MB', unsupported: true },
+      { name: 'ChiragRao_IMG_3404.heic', cat: 'site-photos', folder: 'site-photos', size: '2.5MB', unsupported: true },
+      { name: 'ChiragRao_IMG_3416.heic', cat: 'site-photos', folder: 'site-photos', size: '2.5MB', unsupported: true },
+      { name: 'ChiragRao_IMG_3423.heic', cat: 'site-photos', folder: 'site-photos', size: '2.4MB', unsupported: true },
+      // Screenshots / Aerials
+      { name: 'Corridoni_aerial.png', cat: 'screenshots', folder: 'screenshots', size: '1.9MB' },
+      { name: 'Hetherington_aerial_01.png', cat: 'screenshots', folder: 'screenshots', size: '3.9MB' },
+      { name: 'Hetherington_aerial_02.png', cat: 'screenshots', folder: 'screenshots', size: '4.5MB' },
+      { name: 'Hetherington_aerial_03.png', cat: 'screenshots', folder: 'screenshots', size: '4.4MB' },
+      { name: 'Painter_aerial.png', cat: 'screenshots', folder: 'screenshots', size: '6.9MB' },
+      { name: 'Diamond_CVS_Monroeville.png', cat: 'screenshots', folder: 'screenshots', size: '1.8MB' },
+      { name: 'HolyResurrection_Church.png', cat: 'screenshots', folder: 'screenshots', size: '1.9MB' },
+      { name: 'Satira_ExpressEmploy.png', cat: 'screenshots', folder: 'screenshots', size: '3.3MB' },
+      { name: 'VSH_Aspinwall.png', cat: 'screenshots', folder: 'screenshots', size: '900KB' },
+      // Satellite
+      { name: 'BannerSupply_close.png', cat: 'satellite', folder: 'satellite', size: '303KB' },
+      { name: 'BannerSupply_wide.png', cat: 'satellite', folder: 'satellite', size: '331KB' },
+      { name: 'Corridoni_close.png', cat: 'satellite', folder: 'satellite', size: '288KB' },
+      { name: 'Corridoni_wide.png', cat: 'satellite', folder: 'satellite', size: '307KB' },
+      { name: 'TRCA_PropertyMgmt_VIPDrive_close.png', cat: 'satellite', folder: 'satellite', size: '303KB' },
+      { name: 'TRCA_PropertyMgmt_VIPDrive_wide.png', cat: 'satellite', folder: 'satellite', size: '353KB' },
+      { name: 'TRCA_PropertyMgmt_wide.png', cat: 'satellite', folder: 'satellite', size: '344KB' },
+      // Equipment
+      { name: 'paverdecal.png', cat: 'equipment', folder: 'equipment', size: '33MB' },
+      // Logos
+      { name: 'brants_asphalt_logo.png', cat: 'logos', folder: 'logos', size: '423KB' },
+      { name: 'Logo.png', cat: 'logos', folder: 'logos', size: '209KB' },
+      { name: 'Logo2.png', cat: 'logos', folder: 'logos', size: '1.5MB' },
+      { name: 'headshot_original.jpeg', cat: 'logos', folder: 'logos', size: '126KB' },
+      { name: 'headshot_transparent.png', cat: 'logos', folder: 'logos', size: '529KB' },
+      { name: 'Stickers.png', cat: 'logos', folder: 'logos', size: '590KB' },
+      { name: 'background-video.mp4', cat: 'logos', folder: 'logos', size: '10MB', video: true },
+      // Social
+      { name: 'BBB_Aplus_Badge.png', cat: 'social', folder: 'social', size: '961KB' },
+      { name: 'Google_Reviews_Badge.png', cat: 'social', folder: 'social', size: '1MB' },
+      // Midjourney
+      { name: 'bold_logo_concept.png', cat: 'midjourney', folder: 'midjourney', size: '2.8MB' },
+    ];
+
+    const catLabels = {
+      'site-photos': '📸 Site Photos',
+      'screenshots': '🛰️ Aerials',
+      'satellite': '🗺️ Satellite',
+      'equipment': '🏗️ Equipment',
+      'logos': '🎨 Logos/Brand',
+      'social': '🏆 Social Proof',
+      'midjourney': '💡 Concepts'
+    };
+
+    let activeFilter = 'all';
+
+    function renderFilters() {
+      const cats = ['all', ...new Set(assets.map(a => a.cat))];
+      document.getElementById('filters').innerHTML = cats.map(c => 
+        `<div class="filter-btn ${c === activeFilter ? 'active' : ''}" onclick="setFilter('${c}')">${c === 'all' ? '🔄 All ('+assets.length+')' : (catLabels[c]||c) + ' (' + assets.filter(a=>a.cat===c).length + ')'}</div>`
+      ).join('');
+    }
+
+    function setFilter(cat) {
+      activeFilter = cat;
+      renderFilters();
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const filtered = activeFilter === 'all' ? assets : assets.filter(a => a.cat === activeFilter);
+      document.getElementById('grid').innerHTML = filtered.map((a, i) => {
+        const path = `${BASE}/${a.folder}/${a.name}`;
+        const sel = selected.has(a.name) ? 'selected' : '';
+        let media;
+        if (a.unsupported) {
+          media = `<div class="unsupported">📱 HEIC — preview unavailable</div>`;
+        } else if (a.video) {
+          media = `<video src="${path}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+        } else {
+          media = `<img src="${path}" loading="lazy" onerror="this.outerHTML='<div class=unsupported>⚠️ Cannot load</div>'" ondblclick="openLightbox('${path}', ${!!a.video})">`;
+        }
+        return `<div class="card ${sel}" onclick="toggleSelect('${a.name}', this)" ondblclick="event.stopPropagation(); openLightbox('${path}', ${!!a.video})">
+          ${media}
+          <div class="card-info">
+            <div class="card-name">${a.name}</div>
+            <div class="card-meta">${a.size} · ${a.folder}</div>
+            <span class="card-cat cat-${a.cat}">${a.cat}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleSelect(name, el) {
+      if (selected.has(name)) { selected.delete(name); el.classList.remove('selected'); }
+      else { selected.add(name); el.classList.add('selected'); }
+      document.getElementById('selCount').textContent = selected.size;
+      document.getElementById('actionBar').classList.toggle('visible', selected.size > 0);
+    }
+
+    function copyList() {
+      const list = [...selected].join('\n');
+      navigator.clipboard.writeText(list).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy File List', 1500);
+      });
+    }
+
+    function exportList() {
+      const list = [...selected].join('\n');
+      const blob = new Blob([list], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'portfolio-selection.txt';
+      a.click();
+    }
+
+    function openLightbox(path, isVideo) {
+      const lb = document.getElementById('lightbox');
+      const content = document.getElementById('lightboxContent');
+      if (isVideo) {
+        content.innerHTML = `<video src="${path}" controls autoplay style="max-width:90vw;max-height:90vh;border-radius:8px;"></video>`;
+      } else {
+        content.innerHTML = `<img src="${path}">`;
+      }
+      lb.classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    renderFilters();
+    renderGrid();
+  </script>
+</body>
+</html>
