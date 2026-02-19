@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team — Mission Control</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .org-chart { margin-bottom: 40px; }
+
+    /* Leader card */
+    .leader-row {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .leader-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 200px;
+      position: relative;
+      transition: all 0.15s;
+    }
+    .leader-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
+    .leader-card .agent-avatar { font-size: 32px; margin-bottom: 8px; }
+    .leader-card .agent-name { font-size: 15px; font-weight: 600; color: var(--text-bright); }
+    .leader-card .agent-title { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Connector lines */
+    .connector {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .connector-line {
+      width: 1px;
+      height: 24px;
+      background: var(--border-hover);
+    }
+    .connector-branch {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .connector-branch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 12px;
+      background: var(--border-hover);
+    }
+    .connector-branch::after {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: calc(50% - 300px);
+      width: 600px;
+      height: 1px;
+      background: var(--border-hover);
+    }
+
+    /* Agent grid */
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      transition: all 0.15s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    .agent-card:hover { border-color: var(--border-hover); background: var(--surface-2); }
+
+    .agent-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .agent-avatar {
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-3);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .agent-info { flex: 1; min-width: 0; }
+    .agent-name { font-size: 14px; font-weight: 600; color: var(--text-bright); }
+    .agent-title { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .agent-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .status-online .agent-status-dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+    .status-online { color: var(--green); }
+    .status-standby .agent-status-dot { background: var(--text-dim); }
+    .status-standby { color: var(--text-dim); }
+    .status-active .agent-status-dot { background: var(--blue); box-shadow: 0 0 6px rgba(59,130,246,0.4); }
+    .status-active { color: var(--blue); }
+
+    .agent-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .agent-responsibilities {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .agent-resp-item {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.4;
+    }
+    .agent-resp-bullet {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .agent-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .agent-schedule {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .agent-model {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .role-pill {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .role-leadership { background: var(--red-dim); color: var(--red); }
+    .role-engineering { background: var(--blue-dim); color: var(--blue); }
+    .role-content { background: var(--green-dim); color: var(--green); }
+    .role-analytics { background: var(--yellow-dim); color: var(--yellow); }
+    .role-sales { background: var(--violet-dim); color: var(--violet); }
+    .role-operations { background: rgba(34,211,238,0.1); color: #22d3ee; }
+    .role-design { background: rgba(236,72,153,0.1); color: #ec4899; }
+
+    /* Summary stats */
+    .team-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .team-stat {
+      background: var(--surface);
+      padding: 16px 18px;
+    }
+
+    .section-label { margin-top: 8px; }
+
+    /* Motto */
+    .motto {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 32px;
+      letter-spacing: 0.01em;
+    }
+
+    @media (max-width: 768px) {
+      .agent-grid { grid-template-columns: 1fr; }
+      .leader-row { flex-direction: column; align-items: center; gap: 8px; }
+      .connector-branch::after { width: 1px; left: 50%; height: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a href="index.html" class="nav-logo">🦞</a>
+        <div class="nav-title">Mission Control</div>
+      </div>
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">Tasks</a>
+        <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="memory.html" class="nav-tab">Memory</a>
+        <a href="team.html" class="nav-tab active">Team</a>
+      </div>
+      <div class="nav-right">
+        <div class="nav-status"><div class="nav-status-dot"></div>Online</div>
+      </div>
+    </nav>
+
+    <div class="motto" id="motto"></div>
+    <div class="team-stats" id="teamStats"></div>
+
+    <div class="org-chart">
+      <div class="leader-row" id="leaderRow"></div>
+      <div class="connector"><div class="connector-line"></div></div>
+      <div class="connector-branch" id="connectorBranch"></div>
+    </div>
+
+    <div class="section-label">Team Roster</div>
+    <div class="agent-grid" id="agentGrid"></div>
+
+    <div class="updated-label" id="updatedLabel"></div>
+  </div>
+
+  <script>
+    let data = {};
+
+    async function load() {
+      try {
+        const res = await fetch('team.json?t=' + Date.now());
+        data = await res.json();
+        render();
+        document.getElementById('updatedLabel').textContent = 'Updated ' + new Date(data.lastUpdated).toLocaleString();
+      } catch(e) { console.error(e); }
+    }
+
+    function render() {
+      document.getElementById('motto').textContent = `"${data.company.motto}"`;
+      renderStats();
+      renderLeaders();
+      renderAgents();
+    }
+
+    function renderStats() {
+      const total = data.agents.length + 1; // +1 for Shane
+      const online = data.agents.filter(a => a.status === 'online').length;
+      const roles = new Set(data.agents.map(a => a.role));
+
+      document.getElementById('teamStats').innerHTML = `
+        <div class="team-stat"><div class="stat-label">Team Size</div><div class="stat-value">${total}</div></div>
+        <div class="team-stat"><div class="stat-label">AI Agents</div><div class="stat-value" style="color:var(--blue)">${data.agents.length}</div></div>
+        <div class="team-stat"><div class="stat-label">Online Now</div><div class="stat-value" style="color:var(--green)">${online + 1}</div></div>
+        <div class="team-stat"><div class="stat-label">Departments</div><div class="stat-value" style="color:var(--violet)">${roles.size}</div></div>
+        <div class="team-stat"><div class="stat-label">Standby</div><div class="stat-value" style="color:var(--text-dim)">${data.agents.filter(a => a.status === 'standby').length}</div></div>
+      `;
+    }
+
+    function renderLeaders() {
+      const shane = data.leadership;
+      const clawd = data.agents.find(a => a.id === 'clawd');
+
+      document.getElementById('leaderRow').innerHTML = `
+        <div class="leader-card">
+          <div class="agent-avatar">${shane.avatar}</div>
+          <div class="agent-name">${shane.name}</div>
+          <div class="agent-title">${shane.title}</div>
+          <div style="margin-top:8px"><span class="agent-status status-active"><span class="agent-status-dot"></span> Active</span></div>
+        </div>
+        <div class="leader-card">
+          <div class="agent-avatar">${clawd.avatar}</div>
+          <div class="agent-name">${clawd.name}</div>
+          <div class="agent-title">${clawd.title}</div>
+          <div style="margin-top:8px"><span class="agent-status status-${clawd.status}"><span class="agent-status-dot"></span> ${clawd.status}</span></div>
+        </div>
+      `;
+    }
+
+    function renderAgents() {
+      const agents = data.agents.filter(a => a.id !== 'clawd');
+      const roleOrder = ['engineering', 'content', 'analytics', 'sales', 'operations', 'design'];
+      agents.sort((a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role));
+
+      document.getElementById('agentGrid').innerHTML = agents.map(a => `
+        <div class="agent-card">
+          <div class="agent-card-header">
+            <div class="agent-avatar">${a.avatar}</div>
+            <div class="agent-info">
+              <div class="agent-name">${a.name}</div>
+              <div class="agent-title">${a.title}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="role-pill role-${a.role}">${data.roles[a.role].label}</span>
+              <span class="agent-status status-${a.status}"><span class="agent-status-dot"></span> ${a.status}</span>
+            </div>
+          </div>
+          <div class="agent-desc">${a.description}</div>
+          <div class="agent-responsibilities">
+            ${a.responsibilities.map(r => `<div class="agent-resp-item"><div class="agent-resp-bullet"></div>${esc(r)}</div>`).join('')}
+          </div>
+          <div class="agent-footer">
+            <div class="agent-schedule">${a.schedule}</div>
+            <div class="agent-model">${a.model}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    load();
+  </script>
+</body>
+</html>
