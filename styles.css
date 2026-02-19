@@ -315,7 +315,7 @@ body {
 
 .cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -338,6 +338,7 @@ body {
   min-height: 72px;
   padding: 5px;
   overflow: hidden;
+  position: relative;
 }
 .cal-day:hover { background: var(--surface-2); }
 .cal-day.today { background: var(--surface-2); }
@@ -366,7 +367,8 @@ body {
   cursor: pointer;
   transition: opacity 0.15s;
   display: block;
-  max-width: 100%;
+  max-width: calc(100%);
+  box-sizing: border-box;
 }
 .cal-event:hover { opacity: 0.8; }
 .cal-event.recurring { background: var(--violet-dim); color: var(--violet); }
