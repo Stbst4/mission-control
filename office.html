@@ -299,9 +299,25 @@
     }
 
     @media (max-width: 768px) {
-      .exec-row { flex-direction: column; align-items: center; gap: 8px; }
-      .workstation-grid { grid-template-columns: 1fr; }
+      .exec-row { flex-direction: column; align-items: stretch; gap: 6px; }
+      .workstation-grid { grid-template-columns: 1fr; gap: 4px; }
+      .workstation { padding: 10px; }
       .workstation.is-exec { min-width: auto; }
+      .avatar-seat { width: 36px; height: 36px; font-size: 18px; }
+      .avatar-ring { inset: -2px; border-radius: 10px; }
+      .agent-name { font-size: 12px; }
+      .agent-title-text { font-size: 10px; }
+      .agent-role-tag { font-size: 8px; padding: 1px 5px; }
+      .monitor { padding: 6px 8px; min-height: 36px; }
+      .monitor-content { font-size: 10px; }
+      .monitor-task { font-size: 11px; }
+      .monitor-label { font-size: 8px; }
+      .station-status { font-size: 9px; }
+      .station-uptime { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+      .status-bar-item { padding: 6px 8px; }
+      .sb-value { font-size: 16px; }
+      .sb-label { font-size: 8px; }
+      .office-clock { font-size: 9px; }
     }
   </style>
 </head>
