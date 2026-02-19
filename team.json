@@ -48,7 +48,7 @@
         "Script automation"
       ],
       "schedule": "Spawned on demand for coding tasks",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     },
     {
@@ -67,7 +67,7 @@
         "Training documentation"
       ],
       "schedule": "Spawned for content creation tasks",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     },
     {
@@ -86,7 +86,7 @@
         "Property research & lot sizing"
       ],
       "schedule": "Spawned for estimates, research, analysis",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     },
     {
@@ -105,7 +105,7 @@
         "Outreach list building"
       ],
       "schedule": "Spawned for prospecting & lead gen",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     },
     {
@@ -124,7 +124,7 @@
         "System health checks"
       ],
       "schedule": "Cron-driven — daily schedule pulls, system checks",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     },
     {
@@ -143,7 +143,7 @@
         "Design system maintenance"
       ],
       "schedule": "Spawned for design & UI tasks",
-      "status": "standby",
+      "status": "online",
       "model": "claude-opus-4-6"
     }
   ],
