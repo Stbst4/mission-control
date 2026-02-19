@@ -6,7 +6,7 @@
       "title": "Mission Control UI/UX Polish",
       "description": "Proactive UI cleanup — tighter spacing, no text overflows, crisper design, minimal padding, overall polish across all pages.",
       "assignee": "bolt",
-      "status": "in-progress",
+      "status": "done",
       "priority": "medium",
       "category": "dev",
       "created": "2026-02-18",
