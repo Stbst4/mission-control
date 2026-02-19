@@ -1,0 +1,74 @@
+{
+  "lastUpdated": "2026-02-18T21:20:00-05:00",
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Fix Jobber OAuth Token",
+      "description": "Refresh token expired. Need to re-authenticate in n8n → Credentials → Jobber OAuth2 → Reconnect. Then update local credentials.",
+      "assignee": "shane",
+      "status": "blocked",
+      "priority": "high",
+      "category": "automation",
+      "created": "2026-02-18",
+      "updated": "2026-02-18"
+    },
+    {
+      "id": "task-002",
+      "title": "Daily 6PM Jobber Schedule Cron",
+      "description": "Cron job runs but fails silently when Jobber token is dead. Blocked until token is refreshed.",
+      "assignee": "clawd",
+      "status": "blocked",
+      "priority": "high",
+      "category": "automation",
+      "created": "2026-02-17",
+      "updated": "2026-02-18",
+      "blockedBy": "task-001"
+    },
+    {
+      "id": "task-003",
+      "title": "SOP Voice Notes",
+      "description": "Record voice notes about SOPs on drive to Washington job. Focus on 'don't do this' stuff for new employees — things that cost money when done wrong. Send recordings to Clawd for formatting.",
+      "assignee": "shane",
+      "status": "todo",
+      "priority": "medium",
+      "category": "operations",
+      "created": "2026-02-18",
+      "updated": "2026-02-18"
+    },
+    {
+      "id": "task-004",
+      "title": "Call Louis Schmidt",
+      "description": "Follow up call with Louis Schmidt. Reminder set for Feb 20 at 9 AM.",
+      "assignee": "shane",
+      "status": "todo",
+      "priority": "medium",
+      "category": "sales",
+      "created": "2026-02-17",
+      "updated": "2026-02-18",
+      "dueDate": "2026-02-20"
+    },
+    {
+      "id": "task-005",
+      "title": "Replit Subscription — Renew or Cancel",
+      "description": "Subscription expires Feb 25. Decide whether to renew or cancel before getting charged.",
+      "assignee": "shane",
+      "status": "todo",
+      "priority": "low",
+      "category": "admin",
+      "created": "2026-02-18",
+      "updated": "2026-02-18",
+      "dueDate": "2026-02-25"
+    },
+    {
+      "id": "task-006",
+      "title": "Mission Control Task Board",
+      "description": "Build task board UI, push to GitHub, deploy via GitHub Pages.",
+      "assignee": "clawd",
+      "status": "in-progress",
+      "priority": "high",
+      "category": "dev",
+      "created": "2026-02-18",
+      "updated": "2026-02-18"
+    }
+  ]
+}
