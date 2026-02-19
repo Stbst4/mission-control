@@ -1,0 +1,91 @@
+{
+  "lastUpdated": "2026-02-18T21:30:00-05:00",
+  "recurring": [
+    {
+      "id": "cron-morning-brief",
+      "title": "☀️ Morning Brief",
+      "description": "AI/tech news, breaking headlines, sports schedule, bids due, today's calendar. Delivered to Telegram.",
+      "schedule": "Daily at 5:00 AM ET",
+      "cron": "0 5 * * *",
+      "assignee": "clawd",
+      "category": "briefing",
+      "enabled": true,
+      "cronJobId": "1d58c3a7-34f1-484d-b38d-5effd83a43cf"
+    },
+    {
+      "id": "cron-jobber-keepalive",
+      "title": "🔑 Jobber Token Keep-Alive",
+      "description": "Refreshes Jobber OAuth token to prevent expiration. Silent — no message unless it fails.",
+      "schedule": "Daily at 6:00 AM ET",
+      "cron": "0 6 * * *",
+      "assignee": "clawd",
+      "category": "automation",
+      "enabled": true,
+      "cronJobId": "bdc77212-5eaf-4319-bb65-baefb38b6a92"
+    },
+    {
+      "id": "cron-daily-schedule",
+      "title": "📋 Tomorrow's Jobber Schedule",
+      "description": "Pulls tomorrow's visits and assessments from Jobber, sends to Shane on Telegram.",
+      "schedule": "Daily at 6:00 PM ET",
+      "cron": "0 18 * * *",
+      "assignee": "clawd",
+      "category": "briefing",
+      "enabled": true,
+      "cronJobId": "37c84309-fdd8-4ff9-8fb1-274b972517fc"
+    },
+    {
+      "id": "cron-github-backup",
+      "title": "💾 Nightly GitHub Backup",
+      "description": "Auto-commits and pushes workspace to GitHub (Stbst4/Clawd). Silent.",
+      "schedule": "Daily at 9:00 PM ET",
+      "cron": "0 21 * * *",
+      "assignee": "clawd",
+      "category": "automation",
+      "enabled": true,
+      "cronJobId": "3d3b13e2-20a2-4059-a9bc-2c64b00b4e50"
+    }
+  ],
+  "scheduled": [
+    {
+      "id": "sched-sop-reminder",
+      "title": "🎤 SOP Voice Notes Reminder",
+      "description": "Remind Shane to record voice notes about SOPs on drive to Washington job.",
+      "datetime": "2026-02-19T07:30:00-05:00",
+      "assignee": "clawd",
+      "category": "reminder",
+      "oneShot": true,
+      "cronJobId": "b76762b9-67cd-4acb-ae9c-b57bd0d0c0b0"
+    },
+    {
+      "id": "sched-louis-schmidt",
+      "title": "📞 Call Louis Schmidt",
+      "description": "Follow up call with Louis Schmidt.",
+      "datetime": "2026-02-20T09:00:00-05:00",
+      "assignee": "shane",
+      "category": "reminder",
+      "oneShot": true,
+      "cronJobId": "48667994-0a76-48c7-bf65-71032c549d18"
+    },
+    {
+      "id": "sched-replit",
+      "title": "💳 Replit Subscription — Renew or Cancel",
+      "description": "Subscription expires Feb 25. Decide before getting charged.",
+      "datetime": "2026-02-23T09:00:00-05:00",
+      "assignee": "shane",
+      "category": "reminder",
+      "oneShot": true,
+      "cronJobId": "1beca705-8059-4fb5-8820-67e1c175cfa4"
+    },
+    {
+      "id": "sched-breeze-checkin",
+      "title": "✈️ Breeze Flight Check-In",
+      "description": "Check in for Breeze flight MX741 PIT → RSW, departing 8:43 PM. Confirmation: W4NNXV.",
+      "datetime": "2026-02-26T20:40:00-05:00",
+      "assignee": "shane",
+      "category": "reminder",
+      "oneShot": true,
+      "cronJobId": "933ddbe7-4edb-4098-beab-af46b17aec54"
+    }
+  ]
+}

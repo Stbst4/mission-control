@@ -322,16 +322,20 @@
 </head>
 <body>
   <div class="container">
-    <div class="header">
+    <nav class="nav-bar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
       <div class="header-left">
         <div class="logo">🦞</div>
         <h1>Mission <span>Control</span></h1>
       </div>
-      <div class="status-badge">
-        <div class="status-dot"></div>
-        Clawd Online
+      <div style="display:flex;gap:4px;align-items:center">
+        <a href="index.html" style="padding:8px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:100px;color:#ef4444;font-size:13px;text-decoration:none;font-family:inherit">Tasks</a>
+        <a href="calendar.html" style="padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:100px;color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;font-family:inherit;transition:all 0.2s">Calendar</a>
+        <div class="status-badge" style="margin-left:12px">
+          <div class="status-dot"></div>
+          Clawd Online
+        </div>
       </div>
-    </div>
+    </nav>
 
     <div class="stats" id="stats"></div>
     <div class="filters" id="filters"></div>
