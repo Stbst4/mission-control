@@ -6,25 +6,15 @@
   <title>Prospects — Mission Control</title>
   <link rel="stylesheet" href="styles.css?v=ux20260221">
   <style>
-    /* ─── Prospect-specific styles ─── */
-    .prospect-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
+    /* Prospect-specific styles */
     .prospect-card {
-      display: grid;
-      grid-template-columns: 6px minmax(0, 1fr) auto auto auto;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 4px;
       transition: all 0.15s;
       cursor: pointer;
-      overflow: hidden;
     }
     .prospect-card:hover {
       border-color: var(--border-hover);
@@ -32,70 +22,53 @@
       transform: translateY(-1px);
       box-shadow: 0 10px 22px rgba(0,0,0,0.18);
     }
-    .prospect-card.expanded .prospect-details { display: block; }
 
-    .prospect-info { min-width: 0; overflow: hidden; }
+    .prospect-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
     .prospect-name {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-bright);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.3;
     }
+    .prospect-pills { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
     .prospect-address {
       font-size: 11px;
       color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 1px;
-    }
-    .prospect-contact-preview {
-      font-size: 10px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-bottom: 6px;
     }
 
-    .prospect-details {
-      display: none;
-      grid-column: 2 / -1;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-      margin-top: 6px;
-    }
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 20px;
-    }
-    .detail-item {
+    .prospect-contact-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
       font-size: 11px;
-    }
-    .detail-label {
-      color: var(--text-dim);
-      font-weight: 500;
-      text-transform: uppercase;
-      font-size: 9px;
-      letter-spacing: 0.04em;
-      margin-bottom: 1px;
-    }
-    .detail-value {
       color: var(--text-secondary);
+      margin-bottom: 6px;
     }
-    .detail-value a {
-      color: var(--blue);
-      text-decoration: none;
+    .prospect-contact-row span { display: flex; align-items: center; gap: 3px; }
+    .prospect-contact-row .label { color: var(--text-dim); font-size: 10px; }
+
+    .prospect-notes {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.4;
     }
-    .detail-value a:hover { text-decoration: underline; }
-    .detail-notes {
-      grid-column: 1 / -1;
-      margin-top: 4px;
-      padding-top: 6px;
-      border-top: 1px solid var(--border);
+
+    .prospect-lot {
+      font-size: 10px;
+      color: var(--text-secondary);
+      background: var(--surface-3);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
     }
 
     /* Category pills */
@@ -104,15 +77,18 @@
     .pill-shopping { background: var(--yellow-dim); color: var(--yellow); }
     .pill-municipal { background: var(--green-dim); color: var(--green); }
     .pill-hoa { background: rgba(236,72,153,0.1); color: #ec4899; }
-    .pill-property { background: rgba(251,146,60,0.1); color: #fb923c; }
-    .pill-college { background: var(--blue-dim); color: #60a5fa; }
+    .pill-property-mgmt { background: var(--red-dim); color: var(--red); }
+    .pill-college { background: var(--blue-dim); color: var(--blue); }
     .pill-industrial { background: var(--surface-3); color: var(--text-secondary); }
 
-    /* Lot size pills */
-    .pill-lot-vl { background: var(--red-dim); color: var(--red); }
-    .pill-lot-l { background: var(--yellow-dim); color: var(--yellow); }
-    .pill-lot-m { background: var(--surface-3); color: var(--text-muted); }
-    .pill-lot-multi { background: var(--violet-dim); color: var(--violet); }
+    /* Priority dots */
+    .priority-indicator {
+      width: 4px;
+      height: 100%;
+      min-height: 40px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
 
     /* Status pills */
     .pill-new { background: var(--surface-3); color: var(--text-muted); }
@@ -121,50 +97,111 @@
     .pill-won { background: var(--green-dim); color: var(--green); }
     .pill-lost { background: var(--red-dim); color: var(--red); }
 
-    /* Status action buttons */
-    .status-actions {
-      display: flex;
-      gap: 4px;
-      margin-top: 8px;
-      grid-column: 1 / -1;
+    /* Detail panel */
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
     }
-    .status-btn {
-      padding: 4px 10px;
+    .detail-overlay.show { display: flex; align-items: center; justify-content: center; }
+    .detail-panel {
+      background: var(--surface-2);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      max-width: 520px;
+      width: 90%;
+      position: relative;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .detail-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 4px;
+      padding-right: 30px;
+    }
+    .detail-address {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .detail-section {
+      margin-bottom: 14px;
+    }
+    .detail-section-title {
       font-size: 10px;
       font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .detail-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .detail-field:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-muted); }
+    .detail-value { color: var(--text); font-weight: 500; text-align: right; }
+    .detail-value a { color: var(--blue); text-decoration: none; }
+    .detail-value a:hover { text-decoration: underline; }
+    .detail-notes-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .detail-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .detail-close:hover { color: var(--text); }
+
+    .detail-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .detail-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: inherit;
       border-radius: var(--radius);
       border: 1px solid var(--border);
       background: var(--surface);
-      color: var(--text-muted);
+      color: var(--text);
       cursor: pointer;
       transition: all 0.15s;
-      font-family: inherit;
     }
-    .status-btn:hover { border-color: var(--border-hover); color: var(--text); }
-    .status-btn.active { border-color: var(--blue-border); color: var(--blue); background: var(--blue-dim); }
+    .detail-btn:hover { border-color: var(--border-hover); background: var(--surface-3); }
+    .detail-btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .detail-btn.primary:hover { opacity: 0.9; }
 
-    /* Mobile */
+    /* Has-contact indicators */
+    .contact-icon { font-size: 10px; opacity: 0.5; }
+    .contact-icon.has { opacity: 1; }
+
     @media (max-width: 768px) {
-      .prospect-card {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-        padding: 10px;
-      }
-      .prospect-card .priority-dot {
-        position: absolute;
-        top: 12px;
-        left: 10px;
-      }
-      .prospect-name { white-space: normal; font-size: 12px; }
-      .prospect-address { white-space: normal; font-size: 10px; }
-      .prospect-pills { display: flex; gap: 3px; flex-wrap: wrap; }
-      .detail-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (min-width: 769px) {
-      .prospect-pills { display: contents; }
+      .prospect-header { flex-direction: column; gap: 6px; }
+      .prospect-pills { justify-content: flex-start; }
+      .prospect-contact-row { flex-direction: column; gap: 4px; }
+      .detail-panel { padding: 16px; max-width: 95%; }
     }
   </style>
 </head>
@@ -177,9 +214,9 @@
       </div>
       <div class="nav-tabs">
         <a href="index.html" class="nav-tab">Tasks</a>
-        <a href="prospects.html" class="nav-tab active">Prospects</a>
         <a href="agents.html" class="nav-tab">Agents</a>
         <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="prospects.html" class="nav-tab active">Prospects</a>
         <a href="memory.html" class="nav-tab">Memory</a>
         <a href="team.html" class="nav-tab">Team</a>
       </div>
@@ -194,8 +231,8 @@
     <section class="panel hero-panel">
       <div>
         <div class="section-label">Sales Pipeline</div>
-        <h1 class="hero-title">Cold Outreach Prospects</h1>
-        <p class="hero-subtitle">Commercial targets — schools, churches, shopping centers, municipalities, and more.</p>
+        <h1 class="hero-title">Prospects</h1>
+        <p class="hero-subtitle">Cold outreach targets — schools, churches, commercial lots, municipalities.</p>
       </div>
       <div class="hero-meta" id="updatedLabel">Loading…</div>
     </section>
@@ -219,10 +256,15 @@
           </select>
         </div>
       </div>
-      <div class="filters" id="statusFilters" style="margin-top: 6px;"></div>
+      <div class="filters" id="statusFilters" style="margin-top:8px;"></div>
     </section>
 
-    <div class="prospect-grid" id="prospectList"></div>
+    <div id="prospectList"></div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-panel" id="detailPanel"></div>
   </div>
 
   <script>
@@ -232,52 +274,33 @@
     let query = '';
     let sortMode = 'priority';
 
-    const CATEGORY_MAP = {
-      'School District': { pill: 'pill-school', icon: '🏫' },
-      'Church':          { pill: 'pill-church', icon: '⛪' },
-      'Shopping Center':  { pill: 'pill-shopping', icon: '🛒' },
-      'Municipal':       { pill: 'pill-municipal', icon: '🏛️' },
-      'HOA':             { pill: 'pill-hoa', icon: '🏘️' },
-      'Property Management': { pill: 'pill-property', icon: '🏢' },
-      'College':         { pill: 'pill-college', icon: '🎓' },
-      'Industrial':      { pill: 'pill-industrial', icon: '🏭' },
+    const categoryPillClass = {
+      'School District': 'pill-school',
+      'Church': 'pill-church',
+      'Shopping Center': 'pill-shopping',
+      'Municipal': 'pill-municipal',
+      'HOA': 'pill-hoa',
+      'Property Management': 'pill-property-mgmt',
+      'College': 'pill-college',
+      'Industrial': 'pill-industrial',
     };
 
-    const LOT_SIZE_ORDER = {
-      'Very Large': 0,
-      'Large': 1,
-      'Multiple Properties': 1,
-      'Medium-Large': 2,
-      'Medium': 3,
-      'Small-Medium': 4,
+    const statusPillClass = {
+      'new': 'pill-new',
+      'contacted': 'pill-contacted',
+      'quoted': 'pill-quoted',
+      'won': 'pill-won',
+      'lost': 'pill-lost',
     };
 
-    const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-    const STATUS_ORDER = { new: 0, contacted: 1, quoted: 2, won: 3, lost: 4 };
-
-    function getLotPill(size) {
-      if (size.includes('Very Large')) return 'pill-lot-vl';
-      if (size.includes('Multiple')) return 'pill-lot-multi';
-      if (size.includes('Large')) return 'pill-lot-l';
-      return 'pill-lot-m';
-    }
-
-    function getStatusPill(status) {
-      return 'pill-' + (status || 'new');
-    }
+    const lotSizeOrder = { 'Very Large': 0, 'Large': 1, 'Multiple Properties': 1, 'Medium': 2, 'Medium-Large': 2, 'Small-Medium': 3, 'Small': 4 };
+    const priorityOrder = { 'high': 0, 'medium': 1, 'low': 2 };
 
     async function loadProspects() {
       try {
         const res = await fetch('prospects.json?t=' + Date.now());
         const data = await res.json();
         allProspects = data.prospects || [];
-
-        // Load saved statuses from localStorage
-        const saved = JSON.parse(localStorage.getItem('mc-prospect-statuses') || '{}');
-        allProspects.forEach(p => {
-          if (saved[p.id]) p.status = saved[p.id];
-        });
-
         renderStats();
         renderCategoryFilters();
         renderStatusFilters();
@@ -292,26 +315,25 @@
 
     function renderStats() {
       const total = allProspects.length;
-      const highPri = allProspects.filter(p => p.priority === 'high').length;
+      const highPriority = allProspects.filter(p => p.priority === 'high').length;
       const withEmail = allProspects.filter(p => p.email).length;
-      const withPhone = allProspects.filter(p => p.phone).length;
-      const contacted = allProspects.filter(p => p.status === 'contacted').length;
+      const withContact = allProspects.filter(p => p.contact).length;
       const categories = new Set(allProspects.map(p => p.category)).size;
+      const contacted = allProspects.filter(p => p.status !== 'new').length;
 
       document.getElementById('stats').innerHTML = `
         <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
-        <div class="stat-card"><div class="stat-label">High Priority</div><div class="stat-value">${highPri}</div></div>
+        <div class="stat-card"><div class="stat-label">High Priority</div><div class="stat-value">${highPriority}</div></div>
         <div class="stat-card"><div class="stat-label">Has Email</div><div class="stat-value">${withEmail}</div></div>
-        <div class="stat-card"><div class="stat-label">Has Phone</div><div class="stat-value">${withPhone}</div></div>
-        <div class="stat-card"><div class="stat-label">Contacted</div><div class="stat-value">${contacted}</div></div>
+        <div class="stat-card"><div class="stat-label">Has Contact</div><div class="stat-value">${withContact}</div></div>
         <div class="stat-card"><div class="stat-label">Categories</div><div class="stat-value">${categories}</div></div>
+        <div class="stat-card"><div class="stat-label">Contacted</div><div class="stat-value">${contacted}</div></div>
       `;
     }
 
     function renderCategoryFilters() {
       const cats = {};
       allProspects.forEach(p => { cats[p.category] = (cats[p.category] || 0) + 1; });
-
       let html = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">All <span class="filter-count">${allProspects.length}</span></button>`;
       Object.entries(cats).sort((a, b) => b[1] - a[1]).forEach(([cat, count]) => {
         html += `<button class="filter-btn ${activeCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">${cat} <span class="filter-count">${count}</span></button>`;
@@ -320,176 +342,177 @@
     }
 
     function renderStatusFilters() {
-      const statuses = { new: 0, contacted: 0, quoted: 0, won: 0, lost: 0 };
+      const statuses = { 'new': 0, 'contacted': 0, 'quoted': 0, 'won': 0, 'lost': 0 };
       allProspects.forEach(p => { statuses[p.status] = (statuses[p.status] || 0) + 1; });
-
       let html = `<button class="filter-btn ${activeStatus === 'all' ? 'active' : ''}" onclick="setStatus('all')">All Status</button>`;
-      Object.entries(statuses).forEach(([st, count]) => {
-        if (count > 0 || st === 'new') {
-          const label = st.charAt(0).toUpperCase() + st.slice(1);
-          html += `<button class="filter-btn ${activeStatus === st ? 'active' : ''}" onclick="setStatus('${st}')">${label} <span class="filter-count">${count}</span></button>`;
+      Object.entries(statuses).forEach(([status, count]) => {
+        if (count > 0 || status === 'new') {
+          html += `<button class="filter-btn ${activeStatus === status ? 'active' : ''}" onclick="setStatus('${status}')">${status.charAt(0).toUpperCase() + status.slice(1)} <span class="filter-count">${count}</span></button>`;
         }
       });
       document.getElementById('statusFilters').innerHTML = html;
     }
 
-    function setCategory(cat) {
-      activeCategory = cat;
-      renderCategoryFilters();
-      renderProspects();
-    }
+    function setCategory(cat) { activeCategory = cat; renderCategoryFilters(); renderProspects(); }
+    function setStatus(s) { activeStatus = s; renderStatusFilters(); renderProspects(); }
 
-    function setStatus(st) {
-      activeStatus = st;
-      renderStatusFilters();
-      renderProspects();
-    }
-
-    function filterProspects() {
-      return allProspects.filter(p => {
-        if (activeCategory !== 'all' && p.category !== activeCategory) return false;
-        if (activeStatus !== 'all' && p.status !== activeStatus) return false;
-        if (query) {
-          const q = query.toLowerCase();
-          return (
-            p.name.toLowerCase().includes(q) ||
-            p.address.toLowerCase().includes(q) ||
-            (p.contact && p.contact.toLowerCase().includes(q)) ||
-            (p.notes && p.notes.toLowerCase().includes(q)) ||
-            p.category.toLowerCase().includes(q)
-          );
-        }
-        return true;
+    function getFiltered() {
+      let list = [...allProspects];
+      if (activeCategory !== 'all') list = list.filter(p => p.category === activeCategory);
+      if (activeStatus !== 'all') list = list.filter(p => p.status === activeStatus);
+      if (query) {
+        const q = query.toLowerCase();
+        list = list.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          (p.contact && p.contact.toLowerCase().includes(q)) ||
+          p.address.toLowerCase().includes(q) ||
+          (p.notes && p.notes.toLowerCase().includes(q)) ||
+          p.category.toLowerCase().includes(q)
+        );
+      }
+      // Sort
+      list.sort((a, b) => {
+        if (sortMode === 'priority') return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
+        if (sortMode === 'name') return a.name.localeCompare(b.name);
+        if (sortMode === 'category') return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
+        if (sortMode === 'lotSize') return (lotSizeOrder[a.lotSize] ?? 3) - (lotSizeOrder[b.lotSize] ?? 3);
+        return 0;
       });
-    }
-
-    function sortProspects(list) {
-      return list.sort((a, b) => {
-        switch (sortMode) {
-          case 'priority':
-            const pa = PRIORITY_ORDER[a.priority] ?? 9;
-            const pb = PRIORITY_ORDER[b.priority] ?? 9;
-            if (pa !== pb) return pa - pb;
-            return a.name.localeCompare(b.name);
-          case 'name':
-            return a.name.localeCompare(b.name);
-          case 'category':
-            const ca = a.category.localeCompare(b.category);
-            if (ca !== 0) return ca;
-            return a.name.localeCompare(b.name);
-          case 'lotSize':
-            const la = LOT_SIZE_ORDER[a.lotSize] ?? 9;
-            const lb = LOT_SIZE_ORDER[b.lotSize] ?? 9;
-            if (la !== lb) return la - lb;
-            return a.name.localeCompare(b.name);
-          default:
-            return 0;
-        }
-      });
+      return list;
     }
 
     function renderProspects() {
-      const filtered = sortProspects(filterProspects());
-      if (!filtered.length) {
-        document.getElementById('prospectList').innerHTML =
-          '<div class="empty-state">No prospects match your filters.</div>';
+      const list = getFiltered();
+      if (!list.length) {
+        document.getElementById('prospectList').innerHTML = '<div class="empty-state">No prospects match your filters.</div>';
         return;
       }
+      let html = '';
+      list.forEach(p => {
+        const catClass = categoryPillClass[p.category] || 'pill-todo';
+        const statusClass = statusPillClass[p.status] || 'pill-new';
+        const contactLine = [];
+        if (p.contact) contactLine.push(`<span>👤 ${esc(p.contact)}</span>`);
+        if (p.phone) contactLine.push(`<span>📞 ${esc(p.phone)}</span>`);
+        if (p.email) contactLine.push(`<span>✉️ ${esc(p.email)}</span>`);
 
-      const html = filtered.map(p => {
-        const cat = CATEGORY_MAP[p.category] || { pill: 'pill-industrial', icon: '📍' };
-        const contactLine = p.contact ? p.contact : (p.phone || p.email || '');
-
-        return `
-          <div class="prospect-card" onclick="toggleExpand(this)" data-id="${p.id}">
-            <div class="priority-dot priority-${p.priority}"></div>
-            <div class="prospect-info">
-              <div class="prospect-name">${cat.icon} ${p.name}</div>
-              <div class="prospect-address">${p.address}</div>
-              ${contactLine ? `<div class="prospect-contact-preview">${contactLine}</div>` : ''}
-            </div>
-            <div class="prospect-pills">
-              <span class="pill ${cat.pill}">${p.category}</span>
-              <span class="pill ${getLotPill(p.lotSize)}">${p.lotSize}</span>
-              <span class="pill ${getStatusPill(p.status)}">${p.status.toUpperCase()}</span>
-            </div>
-
-            <div class="prospect-details">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <div class="detail-label">Contact</div>
-                  <div class="detail-value">${p.contact || '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Phone</div>
-                  <div class="detail-value">${p.phone ? `<a href="tel:${p.phone}">${p.phone}</a>` : '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Email</div>
-                  <div class="detail-value">${p.email ? `<a href="mailto:${p.email}">${p.email}</a>` : '—'}</div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Lot Size</div>
-                  <div class="detail-value">${p.lotSize}</div>
-                </div>
-                ${p.notes ? `
-                <div class="detail-item detail-notes">
-                  <div class="detail-label">Notes</div>
-                  <div class="detail-value">${p.notes}</div>
-                </div>` : ''}
-                <div class="status-actions">
-                  ${['new', 'contacted', 'quoted', 'won', 'lost'].map(st =>
-                    `<button class="status-btn ${p.status === st ? 'active' : ''}" onclick="event.stopPropagation(); setProspectStatus('${p.id}', '${st}')">${st.charAt(0).toUpperCase() + st.slice(1)}</button>`
-                  ).join('')}
-                </div>
+        html += `
+          <div class="prospect-card" onclick="showDetail('${p.id}')">
+            <div class="prospect-header">
+              <div>
+                <div class="prospect-name">${esc(p.name)}</div>
+                <div class="prospect-address">📍 ${esc(p.address)}</div>
+              </div>
+              <div class="prospect-pills">
+                <span class="pill ${catClass}">${esc(p.category)}</span>
+                <span class="prospect-lot">${esc(p.lotSize)}</span>
+                <span class="pill ${statusClass}">${p.status.toUpperCase()}</span>
               </div>
             </div>
-          </div>
-        `;
-      }).join('');
-
+            ${contactLine.length ? `<div class="prospect-contact-row">${contactLine.join('')}</div>` : ''}
+            ${p.notes ? `<div class="prospect-notes">${esc(p.notes)}</div>` : ''}
+          </div>`;
+      });
       document.getElementById('prospectList').innerHTML = html;
     }
 
-    function toggleExpand(el) {
-      el.classList.toggle('expanded');
+    function showDetail(id) {
+      const p = allProspects.find(x => x.id === id);
+      if (!p) return;
+      const catClass = categoryPillClass[p.category] || 'pill-todo';
+
+      document.getElementById('detailPanel').innerHTML = `
+        <button class="detail-close" onclick="closeDetail()">✕</button>
+        <div class="detail-title">${esc(p.name)}</div>
+        <div class="detail-address">📍 ${esc(p.address)}</div>
+        <div style="display:flex;gap:4px;margin-bottom:14px;">
+          <span class="pill ${catClass}">${esc(p.category)}</span>
+          <span class="prospect-lot">${esc(p.lotSize)}</span>
+          <span class="pill priority-pill-${p.priority}">${p.priority.toUpperCase()} PRIORITY</span>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Contact Info</div>
+          <div class="detail-field"><span class="detail-label">Contact</span><span class="detail-value">${p.contact ? esc(p.contact) : '—'}</span></div>
+          <div class="detail-field"><span class="detail-label">Phone</span><span class="detail-value">${p.phone ? `<a href="tel:${p.phone}">${esc(p.phone)}</a>` : '—'}</span></div>
+          <div class="detail-field"><span class="detail-label">Email</span><span class="detail-value">${p.email ? `<a href="mailto:${p.email}">${esc(p.email)}</a>` : '—'}</span></div>
+        </div>
+
+        ${p.notes ? `
+        <div class="detail-section">
+          <div class="detail-section-title">Notes</div>
+          <div class="detail-notes-text">${esc(p.notes)}</div>
+        </div>` : ''}
+
+        <div class="detail-section">
+          <div class="detail-section-title">Status</div>
+          <div class="detail-field">
+            <span class="detail-label">Current</span>
+            <select class="sort-select" onchange="updateStatus('${p.id}', this.value)" style="font-size:11px;">
+              ${['new','contacted','quoted','won','lost'].map(s =>
+                `<option value="${s}" ${p.status === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div class="detail-field">
+            <span class="detail-label">Priority</span>
+            <select class="sort-select" onchange="updatePriority('${p.id}', this.value)" style="font-size:11px;">
+              ${['high','medium','low'].map(pr =>
+                `<option value="${pr}" ${p.priority === pr ? 'selected' : ''}>${pr.charAt(0).toUpperCase() + pr.slice(1)}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div class="detail-field"><span class="detail-label">Source</span><span class="detail-value">${p.source || 'AI Prospector'}</span></div>
+        </div>
+      `;
+      document.getElementById('detailOverlay').classList.add('show');
     }
 
-    function setProspectStatus(id, status) {
+    function closeDetail() {
+      document.getElementById('detailOverlay').classList.remove('show');
+    }
+
+    function updateStatus(id, newStatus) {
       const p = allProspects.find(x => x.id === id);
-      if (p) {
-        p.status = status;
-        // Persist to localStorage
-        const saved = JSON.parse(localStorage.getItem('mc-prospect-statuses') || '{}');
-        saved[id] = status;
-        localStorage.setItem('mc-prospect-statuses', JSON.stringify(saved));
-        renderStats();
-        renderStatusFilters();
-        renderProspects();
-      }
+      if (p) { p.status = newStatus; renderStats(); renderStatusFilters(); renderProspects(); }
+    }
+
+    function updatePriority(id, newPriority) {
+      const p = allProspects.find(x => x.id === id);
+      if (p) { p.priority = newPriority; renderStats(); renderProspects(); }
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
     }
 
     // Search
     const searchInput = document.getElementById('prospectSearch');
-    searchInput.addEventListener('input', e => {
-      query = e.target.value;
-      renderProspects();
+    searchInput.addEventListener('input', e => { query = e.target.value; renderProspects(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== searchInput) { e.preventDefault(); searchInput.focus(); }
+      if (e.key === 'Escape') { closeDetail(); searchInput.blur(); }
     });
 
     // Sort
-    document.getElementById('sortMode').addEventListener('change', e => {
-      sortMode = e.target.value;
-      renderProspects();
+    document.getElementById('sortMode').addEventListener('change', e => { sortMode = e.target.value; renderProspects(); });
+
+    // Click outside detail panel to close
+    document.getElementById('detailOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('detailOverlay')) closeDetail();
     });
 
-    // Keyboard shortcut
-    document.addEventListener('keydown', e => {
-      if (e.key === '/' && document.activeElement !== searchInput) {
-        e.preventDefault();
-        searchInput.focus();
-      }
-      if (e.key === 'Escape') searchInput.blur();
-    });
+    // Priority pill inline style
+    const style = document.createElement('style');
+    style.textContent = `
+      .priority-pill-high { background: var(--red-dim); color: var(--red); }
+      .priority-pill-medium { background: var(--yellow-dim); color: var(--yellow); }
+      .priority-pill-low { background: var(--blue-dim); color: var(--blue); }
+    `;
+    document.head.appendChild(style);
 
     loadProspects();
   </script>
