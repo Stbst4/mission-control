@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tasks — Mission Control</title>
-  <link rel="stylesheet" href="styles.css?v=e142690">
+  <link rel="stylesheet" href="styles.css?v=ux20260219">
 </head>
 <body>
   <div class="container">
@@ -28,28 +28,57 @@
       </div>
     </nav>
 
+    <section class="panel hero-panel">
+      <div>
+        <div class="section-label">Operations</div>
+        <h1 class="hero-title">Mission Tasks</h1>
+        <p class="hero-subtitle">Track priorities, unblock bottlenecks, and keep the crew moving.</p>
+      </div>
+      <div class="hero-meta" id="updatedLabel">Loading…</div>
+    </section>
+
     <div class="stats" id="stats"></div>
-    <div class="filters" id="filters"></div>
+
+    <section class="panel controls-panel">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="taskSearch" class="search-input" type="text" placeholder="Search tasks, blockers, assignees… (press /)">
+      </div>
+      <div class="controls-row">
+        <div class="filters" id="filters"></div>
+        <div class="sort-wrap">
+          <label for="sortMode" class="sort-label">Sort</label>
+          <select id="sortMode" class="sort-select">
+            <option value="priority">Priority</option>
+            <option value="due">Due date</option>
+            <option value="updated">Recently updated</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
     <div class="task-list" id="taskList"></div>
-    <div class="updated-label" id="updatedLabel"></div>
   </div>
 
   <script>
     let allTasks = [];
     let activeFilter = 'all';
+    let query = '';
+    let sortMode = 'priority';
 
     async function loadTasks() {
       try {
         const res = await fetch('tasks.json?t=' + Date.now());
         const data = await res.json();
-        allTasks = data.tasks;
+        allTasks = data.tasks || [];
         renderStats();
         renderFilters();
         renderTasks();
         document.getElementById('updatedLabel').textContent =
           'Updated ' + new Date(data.lastUpdated).toLocaleString();
-      } catch(e) {
+      } catch (e) {
         document.getElementById('taskList').innerHTML = '<div class="empty-state">Failed to load tasks.</div>';
+        document.getElementById('updatedLabel').textContent = 'Update failed';
       }
     }
 
@@ -71,29 +100,80 @@
       `;
     }
 
+    function countForFilter(f) {
+      if (f === 'all') return allTasks.length;
+      if (['todo','in-progress','blocked','done'].includes(f)) return allTasks.filter(t => t.status === f).length;
+      if (f === 'shane' || f === 'clawd') return allTasks.filter(t => t.assignee === f).length;
+      return 0;
+    }
+
     function renderFilters() {
       const filters = ['all','todo','in-progress','blocked','done','shane','clawd'];
       const labels = {all:'All',todo:'To Do','in-progress':'Active',blocked:'Blocked',done:'Done',shane:'Shane',clawd:'Clawd'};
       document.getElementById('filters').innerHTML = filters.map(f =>
-        `<button class="filter-btn ${f===activeFilter?'active':''}" onclick="setFilter('${f}')">${labels[f]}</button>`
+        `<button class="filter-btn ${f===activeFilter?'active':''}" onclick="setFilter('${f}')">${labels[f]} <span class="filter-count">${countForFilter(f)}</span></button>`
       ).join('');
     }
 
     function setFilter(f) { activeFilter = f; renderFilters(); renderTasks(); }
 
+    function dueTs(task) {
+      if (!task.dueDate) return Number.MAX_SAFE_INTEGER;
+      const t = new Date(task.dueDate).getTime();
+      return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t;
+    }
+
+    function updatedTs(task) {
+      const t = new Date(task.updated || task.created).getTime();
+      return Number.isNaN(t) ? 0 : t;
+    }
+
+    function daysUntil(dateText) {
+      if (!dateText) return '';
+      const target = new Date(dateText);
+      if (Number.isNaN(target.getTime())) return '';
+      const now = new Date();
+      const d = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+      if (d < 0) return ` · ${Math.abs(d)}d overdue`;
+      if (d === 0) return ' · due today';
+      if (d === 1) return ' · due tomorrow';
+      return ` · due in ${d}d`;
+    }
+
+    function taskMatchesQuery(task, q) {
+      if (!q) return true;
+      const hay = [task.title, task.description, task.assignee, task.status, task.category, task.blockedBy, task.dueDate]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return hay.includes(q.toLowerCase());
+    }
+
     function renderTasks() {
       let tasks = [...allTasks];
-      if (['todo','in-progress','blocked','done'].includes(activeFilter))
+
+      if (['todo','in-progress','blocked','done'].includes(activeFilter)) {
         tasks = tasks.filter(t => t.status === activeFilter);
-      else if (activeFilter === 'shane' || activeFilter === 'clawd')
+      } else if (activeFilter === 'shane' || activeFilter === 'clawd') {
         tasks = tasks.filter(t => t.assignee === activeFilter);
+      }
+
+      tasks = tasks.filter(t => taskMatchesQuery(t, query));
 
       const so = {blocked:0,'in-progress':1,todo:2,done:3};
       const po = {high:0,medium:1,low:2};
-      tasks.sort((a,b) => (so[a.status]-so[b.status]) || (po[a.priority]-po[b.priority]));
+
+      if (sortMode === 'due') {
+        tasks.sort((a,b) => dueTs(a) - dueTs(b) || (po[a.priority]-po[b.priority]));
+      } else if (sortMode === 'updated') {
+        tasks.sort((a,b) => updatedTs(b) - updatedTs(a));
+      } else {
+        tasks.sort((a,b) => (so[a.status]-so[b.status]) || (po[a.priority]-po[b.priority]));
+      }
 
       if (!tasks.length) {
-        document.getElementById('taskList').innerHTML = '<div class="empty-state">No tasks match this filter.</div>';
+        const q = query ? ` for “${esc(query)}”` : '';
+        document.getElementById('taskList').innerHTML = `<div class="empty-state">No tasks match this filter${q}.</div>`;
         return;
       }
 
@@ -106,21 +186,45 @@
             <div class="task-title">${esc(t.title)}</div>
             <div class="task-desc">${esc(t.description)}</div>
             <div class="task-meta">
-              ${t.dueDate ? 'Due: ' + t.dueDate + ' · ' : ''}
-              ${t.blockedBy ? 'Blocked by: ' + t.blockedBy + ' · ' : ''}
-              Created: ${t.created} · Updated: ${t.updated}
+              ${t.dueDate ? 'Due: ' + esc(t.dueDate) + daysUntil(t.dueDate) + ' · ' : ''}
+              ${t.blockedBy ? 'Blocked by: ' + esc(t.blockedBy) + ' · ' : ''}
+              Created: ${esc(t.created || '—')} · Updated: ${esc(t.updated || '—')}
             </div>
           </div>
           <div class="task-pills">
-            <span class="pill pill-${t.assignee}">${t.assignee}</span>
-            <span class="pill pill-${t.category}">${t.category}</span>
+            <span class="pill pill-${t.assignee}">${esc(t.assignee)}</span>
+            <span class="pill pill-${t.category}">${esc(t.category)}</span>
             <span class="pill pill-${t.status}">${sl(t.status)}</span>
           </div>
         </div>
       `).join('');
     }
 
-    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+
+    document.getElementById('taskSearch').addEventListener('input', (e) => {
+      query = e.target.value.trim();
+      renderTasks();
+    });
+
+    document.getElementById('sortMode').addEventListener('change', (e) => {
+      sortMode = e.target.value;
+      renderTasks();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement?.id !== 'taskSearch') {
+        e.preventDefault();
+        document.getElementById('taskSearch').focus();
+      }
+      if (e.key === 'Escape' && document.activeElement?.id === 'taskSearch') {
+        document.getElementById('taskSearch').value = '';
+        query = '';
+        renderTasks();
+        document.getElementById('taskSearch').blur();
+      }
+    });
+
     loadTasks();
     setInterval(loadTasks, 60000);
   </script>
