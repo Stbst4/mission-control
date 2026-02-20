@@ -1,10 +1,32 @@
 {
-  "lastUpdated": "2026-02-18T22:24:00-05:00",
+  "lastUpdated": "2026-02-19T20:52:00-05:00",
   "tasks": [
+    {
+      "id": "task-estimator-001",
+      "title": "Bill Hetherington quote recovery + fix",
+      "description": "Recovered prior estimate context, validated options, identified Jobber draft structure issue, and prepared cleanup path.",
+      "assignee": "estimator",
+      "status": "done",
+      "priority": "high",
+      "category": "analytics",
+      "created": "2026-02-19",
+      "updated": "2026-02-19"
+    },
+    {
+      "id": "task-prospect-001",
+      "title": "Prospecting: Large lots within 20 miles of Latrobe, PA",
+      "description": "Find churches/companies with large asphalt parking lots and return names, emails, phones, addresses, and organization names.",
+      "assignee": "prospector",
+      "status": "in-progress",
+      "priority": "high",
+      "category": "sales",
+      "created": "2026-02-19",
+      "updated": "2026-02-19"
+    },
     {
       "id": "task-008",
       "title": "Brainstorm: 10 Dev Priorities for Tomorrow",
-      "description": "Identify 10 high-impact development tasks aligned with mission statement — automation, estimating, systems.",
+      "description": "Identify 10 high-impact development tasks aligned with mission statement \u2014 automation, estimating, systems.",
       "assignee": "bolt",
       "status": "done",
       "priority": "high",
@@ -15,7 +37,7 @@
     {
       "id": "task-009",
       "title": "Brainstorm: 10 Content Priorities for Tomorrow",
-      "description": "Identify 10 high-impact content tasks — early-season booking, brand building, commercial lead generation.",
+      "description": "Identify 10 high-impact content tasks \u2014 early-season booking, brand building, commercial lead generation.",
       "assignee": "ink",
       "status": "done",
       "priority": "high",
@@ -26,7 +48,7 @@
     {
       "id": "task-010",
       "title": "Brainstorm: 10 Analytics Priorities for Tomorrow",
-      "description": "Identify 10 high-impact analysis tasks — pricing optimization, bid tracking, crew efficiency, competitive intel.",
+      "description": "Identify 10 high-impact analysis tasks \u2014 pricing optimization, bid tracking, crew efficiency, competitive intel.",
       "assignee": "gauge",
       "status": "done",
       "priority": "high",
@@ -37,7 +59,7 @@
     {
       "id": "task-011",
       "title": "Brainstorm: 10 Prospecting Priorities for Tomorrow",
-      "description": "Identify 10 high-impact lead generation tasks — commercial targets, pipeline building, property research.",
+      "description": "Identify 10 high-impact lead generation tasks \u2014 commercial targets, pipeline building, property research.",
       "assignee": "radar",
       "status": "done",
       "priority": "high",
@@ -48,7 +70,7 @@
     {
       "id": "task-012",
       "title": "Brainstorm: 10 Operations Priorities for Tomorrow",
-      "description": "Identify 10 high-impact ops tasks — pre-season prep, SOPs, crew readiness, equipment, scheduling.",
+      "description": "Identify 10 high-impact ops tasks \u2014 pre-season prep, SOPs, crew readiness, equipment, scheduling.",
       "assignee": "dispatch",
       "status": "done",
       "priority": "high",
@@ -59,7 +81,7 @@
     {
       "id": "task-013",
       "title": "Brainstorm: 10 Design Priorities for Tomorrow",
-      "description": "Identify 10 high-impact design tasks — customer-facing materials, app UX, brand consistency, mobile experience.",
+      "description": "Identify 10 high-impact design tasks \u2014 customer-facing materials, app UX, brand consistency, mobile experience.",
       "assignee": "pixel",
       "status": "done",
       "priority": "high",
@@ -70,7 +92,7 @@
     {
       "id": "task-007",
       "title": "Mission Control UI/UX Polish",
-      "description": "Proactive UI cleanup — tighter spacing, no text overflows, crisper design, minimal padding, overall polish across all pages.",
+      "description": "Proactive UI cleanup \u2014 tighter spacing, no text overflows, crisper design, minimal padding, overall polish across all pages.",
       "assignee": "bolt",
       "status": "done",
       "priority": "medium",
@@ -81,7 +103,7 @@
     {
       "id": "task-001",
       "title": "Fix Jobber OAuth Token",
-      "description": "Refresh token expired. Need to re-authenticate in n8n → Credentials → Jobber OAuth2 → Reconnect. Then update local credentials.",
+      "description": "Refresh token expired. Need to re-authenticate in n8n \u2192 Credentials \u2192 Jobber OAuth2 \u2192 Reconnect. Then update local credentials.",
       "assignee": "shane",
       "status": "blocked",
       "priority": "high",
@@ -104,7 +126,7 @@
     {
       "id": "task-003",
       "title": "SOP Voice Notes",
-      "description": "Record voice notes about SOPs on drive to Washington job. Focus on 'don't do this' stuff for new employees — things that cost money when done wrong. Send recordings to Clawd for formatting.",
+      "description": "Record voice notes about SOPs on drive to Washington job. Focus on 'don't do this' stuff for new employees \u2014 things that cost money when done wrong. Send recordings to Clawd for formatting.",
       "assignee": "shane",
       "status": "todo",
       "priority": "medium",
@@ -126,7 +148,7 @@
     },
     {
       "id": "task-005",
-      "title": "Replit Subscription — Renew or Cancel",
+      "title": "Replit Subscription \u2014 Renew or Cancel",
       "description": "Subscription expires Feb 25. Decide whether to renew or cancel before getting charged.",
       "assignee": "shane",
       "status": "todo",

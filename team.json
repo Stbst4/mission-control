@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-18T22:00:00-05:00",
+  "lastUpdated": "2026-02-19T20:51:00-05:00",
   "company": {
     "name": "Brant's Digital Operations",
     "motto": "Automation, data, and AI — estimate faster, close smarter, run leaner."
@@ -19,141 +19,54 @@
       "title": "Chief of Staff",
       "avatar": "🦞",
       "role": "leadership",
-      "description": "Primary AI assistant. Orchestrates all sub-agents, manages memory, handles daily briefings, triages email, monitors systems. The brain that never sleeps.",
+      "description": "Primary AI assistant orchestrating work and reporting back to Shane.",
       "responsibilities": [
-        "Daily morning briefs & evening schedules",
-        "Email triage & draft replies",
-        "Memory management & context continuity",
-        "Task delegation to sub-agents",
-        "Cron job orchestration",
-        "Direct conversation with Shane"
+        "Run/monitor sub-agents",
+        "Mission Control updates",
+        "Jobber + ops coordination"
       ],
-      "schedule": "24/7 — heartbeats, crons, always listening",
+      "schedule": "24/7",
       "status": "online",
-      "model": "claude-opus-4-6"
+      "model": "openai-codex/gpt-5.3-codex"
     },
     {
-      "id": "agent-dev",
-      "name": "Bolt",
-      "title": "Lead Developer",
-      "avatar": "⚡",
-      "role": "engineering",
-      "description": "Handles all coding tasks — app development, bug fixes, integrations, API work, deployment. Builds the tools the team runs on.",
-      "responsibilities": [
-        "App development (baappv1, Mission Control)",
-        "API integrations (Jobber, Google, n8n)",
-        "Bug fixes & debugging",
-        "Database work (Supabase)",
-        "Deployment & DevOps",
-        "Script automation"
-      ],
-      "schedule": "Spawned on demand for coding tasks",
-      "status": "online",
-      "model": "claude-opus-4-6"
-    },
-    {
-      "id": "agent-writer",
-      "name": "Ink",
-      "title": "Content Strategist",
-      "avatar": "✍️",
-      "role": "content",
-      "description": "Writes in Shane's voice. Blog posts, SOPs, proposals, bid descriptions, social media content, email copy. Knows the asphalt industry inside and out.",
-      "responsibilities": [
-        "Blog posts & SEO/AEO content",
-        "Standard Operating Procedures",
-        "Bid descriptions & proposal language",
-        "Social media posts & captions",
-        "Email drafts & customer communication",
-        "Training documentation"
-      ],
-      "schedule": "Spawned for content creation tasks",
-      "status": "online",
-      "model": "claude-opus-4-6"
-    },
-    {
-      "id": "agent-analyst",
-      "name": "Gauge",
-      "title": "Business Analyst",
-      "avatar": "📊",
+      "id": "agent-estimator",
+      "name": "Estimator",
+      "title": "Bid & Quote Specialist",
+      "avatar": "📐",
       "role": "analytics",
-      "description": "Crunches numbers. Bid analysis, material calculations, margin optimization, market research, competitor analysis. Turns data into decisions.",
+      "description": "Calculates paving/sealcoat bids and builds Jobber draft quotes.",
       "responsibilities": [
-        "Bid analysis & cost breakdowns",
-        "Material tonnage calculations",
-        "Profit margin optimization",
-        "Market & competitor research",
-        "RFP tracker analysis & reporting",
-        "Property research & lot sizing"
+        "Estimate calculations",
+        "Margin + $/SF validation",
+        "Jobber draft quote creation",
+        "Bid option cleanup"
       ],
-      "schedule": "Spawned for estimates, research, analysis",
+      "schedule": "Spawned on demand",
       "status": "online",
-      "model": "claude-opus-4-6"
+      "model": "anthropic/claude-opus-4-6"
     },
     {
-      "id": "agent-scout",
-      "name": "Radar",
-      "title": "Lead Scout",
-      "avatar": "🎯",
+      "id": "agent-prospect",
+      "name": "Prospector",
+      "title": "Commercial Lot Scout",
+      "avatar": "🛰️",
       "role": "sales",
-      "description": "Hunts for business. Commercial property prospecting, lead qualification, outreach research, contact enrichment. Fills the pipeline.",
+      "description": "Finds large parking lots and decision-maker contacts for outreach.",
       "responsibilities": [
-        "Commercial property prospecting",
-        "Lead research & qualification",
-        "Contact enrichment (phone, email, decision makers)",
-        "Satellite imagery & lot analysis",
-        "Drive folder setup & client documentation",
-        "Outreach list building"
+        "Locate large lots within target radius",
+        "Find company/church ownership info",
+        "Collect names, phones, emails, addresses",
+        "Build outreach-ready lead sheets"
       ],
-      "schedule": "Spawned for prospecting & lead gen",
+      "schedule": "Spawned on demand",
       "status": "online",
-      "model": "claude-opus-4-6"
-    },
-    {
-      "id": "agent-ops",
-      "name": "Dispatch",
-      "title": "Operations Manager",
-      "avatar": "📋",
-      "role": "operations",
-      "description": "Keeps the machine running. Schedule management, Jobber sync, workflow monitoring, equipment tracking, crew coordination support.",
-      "responsibilities": [
-        "Jobber schedule pulls & sync",
-        "Workflow health monitoring (n8n)",
-        "Equipment maintenance tracking",
-        "Weather impact assessments",
-        "Calendar management",
-        "System health checks"
-      ],
-      "schedule": "Cron-driven — daily schedule pulls, system checks",
-      "status": "online",
-      "model": "claude-opus-4-6"
-    },
-    {
-      "id": "agent-designer",
-      "name": "Pixel",
-      "title": "UI/UX Designer",
-      "avatar": "🎨",
-      "role": "design",
-      "description": "Makes things look good. UI design, dashboard layouts, document templates, visual assets. Knows Shane's design preferences cold.",
-      "responsibilities": [
-        "Dashboard & app UI design",
-        "Document & proposal templates",
-        "Social media visual assets",
-        "Brand consistency",
-        "Mobile-responsive layouts",
-        "Design system maintenance"
-      ],
-      "schedule": "Spawned for design & UI tasks",
-      "status": "online",
-      "model": "claude-opus-4-6"
+      "model": "anthropic/claude-opus-4-6"
     }
   ],
   "roles": {
     "leadership": { "label": "Leadership", "color": "red" },
-    "engineering": { "label": "Engineering", "color": "blue" },
-    "content": { "label": "Content", "color": "green" },
-    "analytics": { "label": "Analytics", "color": "yellow" },
-    "sales": { "label": "Sales", "color": "violet" },
-    "operations": { "label": "Operations", "color": "cyan" },
-    "design": { "label": "Design", "color": "pink" }
+    "analytics": { "label": "Estimating", "color": "yellow" },
+    "sales": { "label": "Prospecting", "color": "violet" }
   }
 }
