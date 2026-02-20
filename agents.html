@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agents — Mission Control</title>
+  <link rel="stylesheet" href="styles.css?v=ux20260219" />
+  <style>
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .agent-work-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+    }
+    .agent-work-card.working { border-color: var(--blue-border); }
+    .agent-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .agent-name { font-size: 13px; font-weight: 700; color: var(--text-bright); }
+    .agent-role { font-size: 10px; color: var(--text-muted); }
+    .agent-state { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .state-working { color: var(--blue); }
+    .state-online { color: var(--green); }
+    .state-idle { color: var(--text-dim); }
+
+    .agent-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; margin: 8px 0 10px; }
+    .mini { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 6px; }
+    .mini-label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+    .mini-value { font-size: 14px; font-weight: 700; margin-top: 2px; }
+
+    .task-stack { display: flex; flex-direction: column; gap: 5px; }
+    .task-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .filters { margin:0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a href="index.html" class="nav-logo">🦞</a>
+        <div class="nav-title">Mission Control</div>
+      </div>
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">Tasks</a>
+        <a href="agents.html" class="nav-tab active">Agents</a>
+        <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="memory.html" class="nav-tab">Memory</a>
+        <a href="team.html" class="nav-tab">Team</a>
+      </div>
+      <div class="nav-right"><div class="nav-status"><div class="nav-status-dot"></div>Online</div></div>
+    </nav>
+
+    <section class="panel hero-panel">
+      <div>
+        <div class="section-label">Agent Visibility</div>
+        <h1 class="hero-title">Who’s Working on What</h1>
+        <p class="hero-subtitle">Live rollup from your task board by agent.</p>
+      </div>
+      <div class="hero-meta" id="updated">Loading…</div>
+    </section>
+
+    <div class="stats" id="stats"></div>
+
+    <section class="panel">
+      <div class="controls-row">
+        <div class="filters" id="filters"></div>
+      </div>
+      <div class="agents-grid" id="agentsGrid"></div>
+    </section>
+  </div>
+
+  <script>
+    let team = null;
+    let tasks = [];
+    let activeFilter = 'all';
+
+    const mapAssignee = {
+      clawd: 'clawd',
+      'agent-dev': 'bolt',
+      'agent-writer': 'ink',
+      'agent-analyst': 'gauge',
+      'agent-scout': 'radar',
+      'agent-ops': 'dispatch',
+      'agent-designer': 'pixel',
+      'agent-estimator': 'estimator'
+    };
+
+    async function load() {
+      const [teamRes, taskRes] = await Promise.all([
+        fetch('team.json?t=' + Date.now()),
+        fetch('tasks.json?t=' + Date.now())
+      ]);
+      team = await teamRes.json();
+      tasks = (await taskRes.json()).tasks || [];
+      render();
+      document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleString();
+    }
+
+    function agentRows() {
+      const rows = team.agents.map(a => {
+        const asg = mapAssignee[a.id] || a.name.toLowerCase();
+        const my = tasks.filter(t => (t.assignee || '').toLowerCase() === asg);
+        const working = my.filter(t => t.status === 'in-progress');
+        const blocked = my.filter(t => t.status === 'blocked');
+        const todo = my.filter(t => t.status === 'todo');
+        const done = my.filter(t => t.status === 'done');
+
+        const state = working.length ? 'working' : (todo.length || blocked.length ? 'online' : 'idle');
+        return { a, asg, my, working, blocked, todo, done, state };
+      });
+      return rows;
+    }
+
+    function renderStats() {
+      const rows = agentRows();
+      const total = rows.length;
+      const working = rows.filter(r => r.state === 'working').length;
+      const blocked = rows.reduce((n,r)=>n+r.blocked.length,0);
+      const todo = rows.reduce((n,r)=>n+r.todo.length,0);
+      const done = rows.reduce((n,r)=>n+r.done.length,0);
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Agents</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">Working Now</div><div class="stat-value" style="color:var(--blue)">${working}</div></div>
+        <div class="stat-card"><div class="stat-label">To Do</div><div class="stat-value" style="color:var(--yellow)">${todo}</div></div>
+        <div class="stat-card"><div class="stat-label">Blocked</div><div class="stat-value" style="color:var(--red)">${blocked}</div></div>
+        <div class="stat-card"><div class="stat-label">Done</div><div class="stat-value" style="color:var(--green)">${done}</div></div>
+      `;
+    }
+
+    function renderFilters() {
+      const rows = agentRows();
+      const counts = {
+        all: rows.length,
+        working: rows.filter(r => r.state === 'working').length,
+        blocked: rows.filter(r => r.blocked.length).length,
+        idle: rows.filter(r => r.state === 'idle').length
+      };
+      const labels = { all:'All', working:'Working', blocked:'Has Blockers', idle:'Idle' };
+      document.getElementById('filters').innerHTML = Object.keys(labels).map(k =>
+        `<button class="filter-btn ${k===activeFilter?'active':''}" onclick="setFilter('${k}')">${labels[k]} <span class="filter-count">${counts[k]}</span></button>`
+      ).join('');
+    }
+
+    function setFilter(f) {
+      activeFilter = f;
+      renderFilters();
+      renderGrid();
+    }
+
+    function renderGrid() {
+      let rows = agentRows();
+      if (activeFilter === 'working') rows = rows.filter(r => r.state === 'working');
+      if (activeFilter === 'blocked') rows = rows.filter(r => r.blocked.length);
+      if (activeFilter === 'idle') rows = rows.filter(r => r.state === 'idle');
+
+      if (!rows.length) {
+        document.getElementById('agentsGrid').innerHTML = '<div class="empty-state">No agents match this filter.</div>';
+        return;
+      }
+
+      document.getElementById('agentsGrid').innerHTML = rows.map(r => {
+        const topTasks = [...r.working, ...r.blocked, ...r.todo].slice(0,3);
+        const stateLabel = r.state === 'working' ? 'Working' : (r.state === 'online' ? 'Online' : 'Idle');
+        return `
+          <article class="agent-work-card ${r.state==='working'?'working':''}">
+            <div class="agent-head">
+              <div>
+                <div class="agent-name">${esc(r.a.avatar)} ${esc(r.a.name)}</div>
+                <div class="agent-role">${esc(r.a.title)}</div>
+              </div>
+              <div class="agent-state state-${r.state}">${stateLabel}</div>
+            </div>
+            <div class="agent-stats">
+              <div class="mini"><div class="mini-label">Working</div><div class="mini-value" style="color:var(--blue)">${r.working.length}</div></div>
+              <div class="mini"><div class="mini-label">Blocked</div><div class="mini-value" style="color:var(--red)">${r.blocked.length}</div></div>
+              <div class="mini"><div class="mini-label">Done</div><div class="mini-value" style="color:var(--green)">${r.done.length}</div></div>
+            </div>
+            <div class="task-stack">
+              ${topTasks.length ? topTasks.map(t => `<div class="task-chip">${esc(t.title)}</div>`).join('') : '<div class="task-chip">No active tasks assigned.</div>'}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      renderStats();
+      renderFilters();
+      renderGrid();
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+    load();
+    setInterval(load, 30000);
+  </script>
+</body>
+</html>
