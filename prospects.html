@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prospects — Mission Control</title>
+  <link rel="stylesheet" href="styles.css?v=ux20260221">
+  <style>
+    /* ─── Prospect-specific styles ─── */
+    .prospect-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .prospect-card {
+      display: grid;
+      grid-template-columns: 6px minmax(0, 1fr) auto auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.15s;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .prospect-card:hover {
+      border-color: var(--border-hover);
+      background: var(--surface-2);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+    }
+    .prospect-card.expanded .prospect-details { display: block; }
+
+    .prospect-info { min-width: 0; overflow: hidden; }
+    .prospect-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .prospect-address {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+    .prospect-contact-preview {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prospect-details {
+      display: none;
+      grid-column: 2 / -1;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+    .detail-item {
+      font-size: 11px;
+    }
+    .detail-label {
+      color: var(--text-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      margin-bottom: 1px;
+    }
+    .detail-value {
+      color: var(--text-secondary);
+    }
+    .detail-value a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .detail-value a:hover { text-decoration: underline; }
+    .detail-notes {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Category pills */
+    .pill-school { background: var(--blue-dim); color: var(--blue); }
+    .pill-church { background: var(--violet-dim); color: var(--violet); }
+    .pill-shopping { background: var(--yellow-dim); color: var(--yellow); }
+    .pill-municipal { background: var(--green-dim); color: var(--green); }
+    .pill-hoa { background: rgba(236,72,153,0.1); color: #ec4899; }
+    .pill-property { background: rgba(251,146,60,0.1); color: #fb923c; }
+    .pill-college { background: var(--blue-dim); color: #60a5fa; }
+    .pill-industrial { background: var(--surface-3); color: var(--text-secondary); }
+
+    /* Lot size pills */
+    .pill-lot-vl { background: var(--red-dim); color: var(--red); }
+    .pill-lot-l { background: var(--yellow-dim); color: var(--yellow); }
+    .pill-lot-m { background: var(--surface-3); color: var(--text-muted); }
+    .pill-lot-multi { background: var(--violet-dim); color: var(--violet); }
+
+    /* Status pills */
+    .pill-new { background: var(--surface-3); color: var(--text-muted); }
+    .pill-contacted { background: var(--blue-dim); color: var(--blue); }
+    .pill-quoted { background: var(--yellow-dim); color: var(--yellow); }
+    .pill-won { background: var(--green-dim); color: var(--green); }
+    .pill-lost { background: var(--red-dim); color: var(--red); }
+
+    /* Status action buttons */
+    .status-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      grid-column: 1 / -1;
+    }
+    .status-btn {
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .status-btn:hover { border-color: var(--border-hover); color: var(--text); }
+    .status-btn.active { border-color: var(--blue-border); color: var(--blue); background: var(--blue-dim); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .prospect-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 10px;
+      }
+      .prospect-card .priority-dot {
+        position: absolute;
+        top: 12px;
+        left: 10px;
+      }
+      .prospect-name { white-space: normal; font-size: 12px; }
+      .prospect-address { white-space: normal; font-size: 10px; }
+      .prospect-pills { display: flex; gap: 3px; flex-wrap: wrap; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 769px) {
+      .prospect-pills { display: contents; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a href="index.html" class="nav-logo">🦞</a>
+        <div class="nav-title">Mission Control</div>
+      </div>
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">Tasks</a>
+        <a href="prospects.html" class="nav-tab active">Prospects</a>
+        <a href="agents.html" class="nav-tab">Agents</a>
+        <a href="calendar.html" class="nav-tab">Calendar</a>
+        <a href="memory.html" class="nav-tab">Memory</a>
+        <a href="team.html" class="nav-tab">Team</a>
+      </div>
+      <div class="nav-right">
+        <div class="nav-status">
+          <div class="nav-status-dot"></div>
+          Online
+        </div>
+      </div>
+    </nav>
+
+    <section class="panel hero-panel">
+      <div>
+        <div class="section-label">Sales Pipeline</div>
+        <h1 class="hero-title">Cold Outreach Prospects</h1>
+        <p class="hero-subtitle">Commercial targets — schools, churches, shopping centers, municipalities, and more.</p>
+      </div>
+      <div class="hero-meta" id="updatedLabel">Loading…</div>
+    </section>
+
+    <div class="stats" id="stats"></div>
+
+    <section class="panel controls-panel">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="prospectSearch" class="search-input" type="text" placeholder="Search prospects, contacts, addresses… (press /)">
+      </div>
+      <div class="controls-row">
+        <div class="filters" id="categoryFilters"></div>
+        <div class="sort-wrap">
+          <label for="sortMode" class="sort-label">Sort</label>
+          <select id="sortMode" class="sort-select">
+            <option value="priority">Priority</option>
+            <option value="name">Name</option>
+            <option value="category">Category</option>
+            <option value="lotSize">Lot Size</option>
+          </select>
+        </div>
+      </div>
+      <div class="filters" id="statusFilters" style="margin-top: 6px;"></div>
+    </section>
+
+    <div class="prospect-grid" id="prospectList"></div>
+  </div>
+
+  <script>
+    let allProspects = [];
+    let activeCategory = 'all';
+    let activeStatus = 'all';
+    let query = '';
+    let sortMode = 'priority';
+
+    const CATEGORY_MAP = {
+      'School District': { pill: 'pill-school', icon: '🏫' },
+      'Church':          { pill: 'pill-church', icon: '⛪' },
+      'Shopping Center':  { pill: 'pill-shopping', icon: '🛒' },
+      'Municipal':       { pill: 'pill-municipal', icon: '🏛️' },
+      'HOA':             { pill: 'pill-hoa', icon: '🏘️' },
+      'Property Management': { pill: 'pill-property', icon: '🏢' },
+      'College':         { pill: 'pill-college', icon: '🎓' },
+      'Industrial':      { pill: 'pill-industrial', icon: '🏭' },
+    };
+
+    const LOT_SIZE_ORDER = {
+      'Very Large': 0,
+      'Large': 1,
+      'Multiple Properties': 1,
+      'Medium-Large': 2,
+      'Medium': 3,
+      'Small-Medium': 4,
+    };
+
+    const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+    const STATUS_ORDER = { new: 0, contacted: 1, quoted: 2, won: 3, lost: 4 };
+
+    function getLotPill(size) {
+      if (size.includes('Very Large')) return 'pill-lot-vl';
+      if (size.includes('Multiple')) return 'pill-lot-multi';
+      if (size.includes('Large')) return 'pill-lot-l';
+      return 'pill-lot-m';
+    }
+
+    function getStatusPill(status) {
+      return 'pill-' + (status || 'new');
+    }
+
+    async function loadProspects() {
+      try {
+        const res = await fetch('prospects.json?t=' + Date.now());
+        const data = await res.json();
+        allProspects = data.prospects || [];
+
+        // Load saved statuses from localStorage
+        const saved = JSON.parse(localStorage.getItem('mc-prospect-statuses') || '{}');
+        allProspects.forEach(p => {
+          if (saved[p.id]) p.status = saved[p.id];
+        });
+
+        renderStats();
+        renderCategoryFilters();
+        renderStatusFilters();
+        renderProspects();
+        document.getElementById('updatedLabel').textContent =
+          'Updated ' + new Date(data.lastUpdated).toLocaleString();
+      } catch (e) {
+        document.getElementById('prospectList').innerHTML =
+          '<div class="empty-state">Failed to load prospects.</div>';
+      }
+    }
+
+    function renderStats() {
+      const total = allProspects.length;
+      const highPri = allProspects.filter(p => p.priority === 'high').length;
+      const withEmail = allProspects.filter(p => p.email).length;
+      const withPhone = allProspects.filter(p => p.phone).length;
+      const contacted = allProspects.filter(p => p.status === 'contacted').length;
+      const categories = new Set(allProspects.map(p => p.category)).size;
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+        <div class="stat-card"><div class="stat-label">High Priority</div><div class="stat-value">${highPri}</div></div>
+        <div class="stat-card"><div class="stat-label">Has Email</div><div class="stat-value">${withEmail}</div></div>
+        <div class="stat-card"><div class="stat-label">Has Phone</div><div class="stat-value">${withPhone}</div></div>
+        <div class="stat-card"><div class="stat-label">Contacted</div><div class="stat-value">${contacted}</div></div>
+        <div class="stat-card"><div class="stat-label">Categories</div><div class="stat-value">${categories}</div></div>
+      `;
+    }
+
+    function renderCategoryFilters() {
+      const cats = {};
+      allProspects.forEach(p => { cats[p.category] = (cats[p.category] || 0) + 1; });
+
+      let html = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">All <span class="filter-count">${allProspects.length}</span></button>`;
+      Object.entries(cats).sort((a, b) => b[1] - a[1]).forEach(([cat, count]) => {
+        html += `<button class="filter-btn ${activeCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">${cat} <span class="filter-count">${count}</span></button>`;
+      });
+      document.getElementById('categoryFilters').innerHTML = html;
+    }
+
+    function renderStatusFilters() {
+      const statuses = { new: 0, contacted: 0, quoted: 0, won: 0, lost: 0 };
+      allProspects.forEach(p => { statuses[p.status] = (statuses[p.status] || 0) + 1; });
+
+      let html = `<button class="filter-btn ${activeStatus === 'all' ? 'active' : ''}" onclick="setStatus('all')">All Status</button>`;
+      Object.entries(statuses).forEach(([st, count]) => {
+        if (count > 0 || st === 'new') {
+          const label = st.charAt(0).toUpperCase() + st.slice(1);
+          html += `<button class="filter-btn ${activeStatus === st ? 'active' : ''}" onclick="setStatus('${st}')">${label} <span class="filter-count">${count}</span></button>`;
+        }
+      });
+      document.getElementById('statusFilters').innerHTML = html;
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderCategoryFilters();
+      renderProspects();
+    }
+
+    function setStatus(st) {
+      activeStatus = st;
+      renderStatusFilters();
+      renderProspects();
+    }
+
+    function filterProspects() {
+      return allProspects.filter(p => {
+        if (activeCategory !== 'all' && p.category !== activeCategory) return false;
+        if (activeStatus !== 'all' && p.status !== activeStatus) return false;
+        if (query) {
+          const q = query.toLowerCase();
+          return (
+            p.name.toLowerCase().includes(q) ||
+            p.address.toLowerCase().includes(q) ||
+            (p.contact && p.contact.toLowerCase().includes(q)) ||
+            (p.notes && p.notes.toLowerCase().includes(q)) ||
+            p.category.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      });
+    }
+
+    function sortProspects(list) {
+      return list.sort((a, b) => {
+        switch (sortMode) {
+          case 'priority':
+            const pa = PRIORITY_ORDER[a.priority] ?? 9;
+            const pb = PRIORITY_ORDER[b.priority] ?? 9;
+            if (pa !== pb) return pa - pb;
+            return a.name.localeCompare(b.name);
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'category':
+            const ca = a.category.localeCompare(b.category);
+            if (ca !== 0) return ca;
+            return a.name.localeCompare(b.name);
+          case 'lotSize':
+            const la = LOT_SIZE_ORDER[a.lotSize] ?? 9;
+            const lb = LOT_SIZE_ORDER[b.lotSize] ?? 9;
+            if (la !== lb) return la - lb;
+            return a.name.localeCompare(b.name);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    function renderProspects() {
+      const filtered = sortProspects(filterProspects());
+      if (!filtered.length) {
+        document.getElementById('prospectList').innerHTML =
+          '<div class="empty-state">No prospects match your filters.</div>';
+        return;
+      }
+
+      const html = filtered.map(p => {
+        const cat = CATEGORY_MAP[p.category] || { pill: 'pill-industrial', icon: '📍' };
+        const contactLine = p.contact ? p.contact : (p.phone || p.email || '');
+
+        return `
+          <div class="prospect-card" onclick="toggleExpand(this)" data-id="${p.id}">
+            <div class="priority-dot priority-${p.priority}"></div>
+            <div class="prospect-info">
+              <div class="prospect-name">${cat.icon} ${p.name}</div>
+              <div class="prospect-address">${p.address}</div>
+              ${contactLine ? `<div class="prospect-contact-preview">${contactLine}</div>` : ''}
+            </div>
+            <div class="prospect-pills">
+              <span class="pill ${cat.pill}">${p.category}</span>
+              <span class="pill ${getLotPill(p.lotSize)}">${p.lotSize}</span>
+              <span class="pill ${getStatusPill(p.status)}">${p.status.toUpperCase()}</span>
+            </div>
+
+            <div class="prospect-details">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <div class="detail-label">Contact</div>
+                  <div class="detail-value">${p.contact || '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Phone</div>
+                  <div class="detail-value">${p.phone ? `<a href="tel:${p.phone}">${p.phone}</a>` : '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Email</div>
+                  <div class="detail-value">${p.email ? `<a href="mailto:${p.email}">${p.email}</a>` : '—'}</div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Lot Size</div>
+                  <div class="detail-value">${p.lotSize}</div>
+                </div>
+                ${p.notes ? `
+                <div class="detail-item detail-notes">
+                  <div class="detail-label">Notes</div>
+                  <div class="detail-value">${p.notes}</div>
+                </div>` : ''}
+                <div class="status-actions">
+                  ${['new', 'contacted', 'quoted', 'won', 'lost'].map(st =>
+                    `<button class="status-btn ${p.status === st ? 'active' : ''}" onclick="event.stopPropagation(); setProspectStatus('${p.id}', '${st}')">${st.charAt(0).toUpperCase() + st.slice(1)}</button>`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('prospectList').innerHTML = html;
+    }
+
+    function toggleExpand(el) {
+      el.classList.toggle('expanded');
+    }
+
+    function setProspectStatus(id, status) {
+      const p = allProspects.find(x => x.id === id);
+      if (p) {
+        p.status = status;
+        // Persist to localStorage
+        const saved = JSON.parse(localStorage.getItem('mc-prospect-statuses') || '{}');
+        saved[id] = status;
+        localStorage.setItem('mc-prospect-statuses', JSON.stringify(saved));
+        renderStats();
+        renderStatusFilters();
+        renderProspects();
+      }
+    }
+
+    // Search
+    const searchInput = document.getElementById('prospectSearch');
+    searchInput.addEventListener('input', e => {
+      query = e.target.value;
+      renderProspects();
+    });
+
+    // Sort
+    document.getElementById('sortMode').addEventListener('change', e => {
+      sortMode = e.target.value;
+      renderProspects();
+    });
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+      if (e.key === 'Escape') searchInput.blur();
+    });
+
+    loadProspects();
+  </script>
+</body>
+</html>
