@@ -232,7 +232,7 @@
       <div>
         <div class="section-label">Sales Pipeline</div>
         <h1 class="hero-title">Prospects</h1>
-        <p class="hero-subtitle">Cold outreach targets — schools, churches, commercial lots, municipalities.</p>
+        <p class="hero-subtitle">25 verified leads within 20mi of Latrobe — malls, hospitals, schools, churches, industrial.</p>
       </div>
       <div class="hero-meta" id="updatedLabel">Loading…</div>
     </section>
@@ -392,7 +392,8 @@
         const catClass = categoryPillClass[p.category] || 'pill-todo';
         const statusClass = statusPillClass[p.status] || 'pill-new';
         const contactLine = [];
-        if (p.contact) contactLine.push(`<span>👤 ${esc(p.contact)}</span>`);
+        if (p.contact) contactLine.push(`<span>👤 ${esc(p.contact)}${p.contactTitle ? ' — ' + esc(p.contactTitle) : ''}</span>`);
+        else if (p.contactTitle) contactLine.push(`<span>👤 ${esc(p.contactTitle)}</span>`);
         if (p.phone) contactLine.push(`<span>📞 ${esc(p.phone)}</span>`);
         if (p.email) contactLine.push(`<span>✉️ ${esc(p.email)}</span>`);
 
@@ -434,8 +435,10 @@
         <div class="detail-section">
           <div class="detail-section-title">Contact Info</div>
           <div class="detail-field"><span class="detail-label">Contact</span><span class="detail-value">${p.contact ? esc(p.contact) : '—'}</span></div>
+          <div class="detail-field"><span class="detail-label">Title</span><span class="detail-value">${p.contactTitle ? esc(p.contactTitle) : '—'}</span></div>
           <div class="detail-field"><span class="detail-label">Phone</span><span class="detail-value">${p.phone ? `<a href="tel:${p.phone}">${esc(p.phone)}</a>` : '—'}</span></div>
           <div class="detail-field"><span class="detail-label">Email</span><span class="detail-value">${p.email ? `<a href="mailto:${p.email}">${esc(p.email)}</a>` : '—'}</span></div>
+          <div class="detail-field"><span class="detail-label">Website</span><span class="detail-value">${p.website ? `<a href="https://${p.website}" target="_blank">${esc(p.website)}</a>` : '—'}</span></div>
         </div>
 
         ${p.notes ? `
